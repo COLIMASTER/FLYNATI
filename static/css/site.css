@@ -912,7 +912,7 @@ main {
 .hero-bg {
   position: absolute;
   inset: 0;
-  background-image: url("paisaje.jpg");
+  background-image: url("../imagenes/portada.png");
   background-size: cover;
   background-position: center;
   transform: translateY(0) scale(1.05);
@@ -926,8 +926,8 @@ main {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.72) 0%, rgba(255, 255, 255, 0.58) 35%, rgba(255, 255, 255, 0.35) 100%),
-    radial-gradient(circle at 20% 10%, rgba(255, 255, 255, 0.5), transparent 50%);
+    linear-gradient(180deg, rgba(6, 6, 12, 0.45) 0%, rgba(6, 6, 12, 0.55) 45%, rgba(6, 6, 12, 0.75) 100%),
+    radial-gradient(circle at 20% 10%, rgba(255, 255, 255, 0.08), transparent 55%);
   z-index: 1;
   pointer-events: none;
 }
@@ -951,7 +951,7 @@ main {
   font-weight: 600;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #4c453f;
+  color: rgba(248, 243, 235, 0.75);
 }
 
 .hero-title {
@@ -961,16 +961,16 @@ main {
   font-size: clamp(2.6rem, 6vw, 4.5rem);
   line-height: 1.1;
   letter-spacing: 0.04em;
-  color: #3f3934;
+  color: #f9f4ec;
   margin-top: 10vh;
-  text-shadow: 0 10px 24px rgba(255, 255, 255, 0.4);
+  text-shadow: 0 16px 30px rgba(0, 0, 0, 0.4);
 }
 
 .hero-date {
   font-size: 0.95rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #5b534b;
+  color: rgba(248, 243, 235, 0.8);
   margin-top: auto;
 }
 
@@ -983,14 +983,14 @@ main {
 }
 
 .hero .btn-primary {
-  background: linear-gradient(135deg, #d7b07a, #f1d39d);
-  color: #3f362c;
+  background: linear-gradient(135deg, #e6c59b, #f2d6a8);
+  color: #2a1d14;
 }
 
 .hero .btn-ghost {
-  border-color: rgba(70, 60, 52, 0.35);
-  color: #3f3934;
-  background: rgba(255, 255, 255, 0.6);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #f8f3ea;
+  background: rgba(10, 10, 12, 0.35);
 }
 
 .hero-frames {
@@ -1008,9 +1008,9 @@ main {
   width: 44px;
   height: 44px;
   border-radius: 999px;
-  border: 1px solid rgba(70, 60, 52, 0.3);
-  background: rgba(255, 255, 255, 0.5);
-  color: #4b423a;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: rgba(10, 10, 12, 0.45);
+  color: rgba(255, 255, 255, 0.85);
   animation: scrollBounce 2.6s ease-in-out infinite;
   pointer-events: none;
 }
@@ -1291,14 +1291,23 @@ main {
 /* Timeline */
 
 .timeline {
-  background: linear-gradient(160deg, #eef2f6 0%, #f4eadd 60%, #e1d0c2 100%);
+  background: none;
+  color: #2a241e;
+}
+
+.timeline::before {
+  background-image: url("../imagenes/agenda.png");
+  background-size: cover;
+  background-position: center;
+  filter: blur(1.6px);
+  transform: scale(1.03);
+  opacity: 0.6;
 }
 
 .timeline::after {
   background-image:
-    linear-gradient(120deg, rgba(200, 164, 112, 0.22), transparent 45%),
-    radial-gradient(circle at 20% 30%, rgba(120, 160, 200, 0.25), transparent 50%);
-  opacity: 0.5;
+    linear-gradient(180deg, rgba(250, 245, 238, 0.75) 0%, rgba(250, 245, 238, 0.88) 60%, rgba(240, 230, 220, 0.9) 100%);
+  opacity: 0.85;
 }
 
 .timeline-track {
@@ -1718,6 +1727,114 @@ main {
   letter-spacing: 0.18em;
 }
 
+.gallery-scroll {
+  margin-top: 28px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(200, 164, 112, 0.55) transparent;
+  --gallery-height: clamp(220px, 34vw, 380px);
+}
+
+.gallery-scroll::-webkit-scrollbar {
+  height: 8px;
+}
+
+.gallery-scroll::-webkit-scrollbar-thumb {
+  background: rgba(200, 164, 112, 0.55);
+  border-radius: 999px;
+}
+
+.gallery-track {
+  display: flex;
+  gap: 20px;
+  padding: 10px 12px 24px;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+.gallery-thumb {
+  padding: 0;
+  border: 1px solid rgba(200, 164, 112, 0.4);
+  background: rgba(255, 255, 255, 0.75);
+  border-radius: 22px;
+  overflow: hidden;
+  height: var(--gallery-height);
+  width: auto;
+  box-shadow: 0 26px 60px rgba(0, 0, 0, 0.18);
+  cursor: zoom-in;
+  scroll-snap-align: start;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: stretch;
+}
+
+.gallery-thumb:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 32px 70px rgba(0, 0, 0, 0.22);
+}
+
+.gallery-thumb img {
+  height: 100%;
+  width: auto;
+  display: block;
+}
+
+.gallery-lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(10, 10, 14, 0.78);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1100;
+  transition: opacity 0.35s ease;
+}
+
+.gallery-lightbox.is-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.gallery-lightbox img {
+  max-width: min(1200px, 92vw);
+  max-height: 85vh;
+  border-radius: 26px;
+  box-shadow: 0 40px 90px rgba(0, 0, 0, 0.6);
+}
+
+.gallery-lightbox-close {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  width: 46px;
+  height: 46px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(12, 12, 16, 0.6);
+  color: #fff3e4;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.gallery-lightbox-close svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 /* Venue */
 
 .venue {
@@ -2048,7 +2165,7 @@ main {
 .thankyou-overlay {
   position: fixed;
   inset: 0;
-  background: url("camino.jpeg") center/cover no-repeat;
+  background: url("../imagenes/cierre.png") center/cover no-repeat;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2188,17 +2305,28 @@ main {
 /* Closing */
 
 .closing {
-  background: linear-gradient(180deg, #0a0a0d 0%, #1b1115 60%, #09080b 100%);
+  background: none;
   color: #f7efe5;
   text-align: center;
 }
 
+.closing::before {
+  content: "";
+  position: absolute;
+  inset: -12px;
+  background: url("../imagenes/gracias.png") center/cover no-repeat;
+  filter: blur(1.6px);
+  transform: scale(1.02);
+  opacity: 0.9;
+  z-index: 0;
+}
+
 .closing::after {
-  background-image:
-    radial-gradient(circle at 50% 20%, rgba(200, 164, 112, 0.28), transparent 50%),
-    radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.12), transparent 55%),
-    radial-gradient(circle at 80% 70%, rgba(150, 80, 100, 0.2), transparent 55%);
-  opacity: 0.5;
+  background:
+    linear-gradient(180deg, rgba(10, 10, 12, 0.45) 0%, rgba(10, 10, 12, 0.78) 100%),
+    radial-gradient(circle at 50% 20%, rgba(200, 164, 112, 0.24), transparent 52%),
+    radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.12), transparent 55%);
+  opacity: 0.8;
 }
 
 .closing .btn-ghost {
@@ -2460,6 +2588,10 @@ main {
     justify-content: center;
   }
 
+  .gallery-scroll {
+    --gallery-height: clamp(200px, 42vw, 320px);
+  }
+
   .split {
     gap: 36px;
   }
@@ -2556,6 +2688,10 @@ main {
 
   .site-nav a {
     white-space: nowrap;
+  }
+
+  .gallery-scroll {
+    --gallery-height: clamp(180px, 62vw, 260px);
   }
 
   .intro-hint {

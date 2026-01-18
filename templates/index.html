@@ -236,6 +236,58 @@
               Subir fotos de la boda
             </a>
           </div>
+          <div class="gallery-scroll reveal" aria-label="Galería de recuerdos">
+            <div class="gallery-track" id="gallery-track">
+              <button
+                class="gallery-thumb"
+                type="button"
+                data-full="{{ url_for('static', filename='imagenes/galeria1.jpeg') }}"
+                aria-label="Ampliar foto 1"
+              >
+                <img
+                  src="{{ url_for('static', filename='imagenes/galeria1.jpeg') }}"
+                  alt="Recuerdo 1"
+                  loading="lazy"
+                />
+              </button>
+              <button
+                class="gallery-thumb"
+                type="button"
+                data-full="{{ url_for('static', filename='imagenes/galeria2.jpeg') }}"
+                aria-label="Ampliar foto 2"
+              >
+                <img
+                  src="{{ url_for('static', filename='imagenes/galeria2.jpeg') }}"
+                  alt="Recuerdo 2"
+                  loading="lazy"
+                />
+              </button>
+              <button
+                class="gallery-thumb"
+                type="button"
+                data-full="{{ url_for('static', filename='imagenes/galeria3.jpeg') }}"
+                aria-label="Ampliar foto 3"
+              >
+                <img
+                  src="{{ url_for('static', filename='imagenes/galeria3.jpeg') }}"
+                  alt="Recuerdo 3"
+                  loading="lazy"
+                />
+              </button>
+              <button
+                class="gallery-thumb"
+                type="button"
+                data-full="{{ url_for('static', filename='imagenes/galeria4.jpeg') }}"
+                aria-label="Ampliar foto 4"
+              >
+                <img
+                  src="{{ url_for('static', filename='imagenes/galeria4.jpeg') }}"
+                  alt="Recuerdo 4"
+                  loading="lazy"
+                />
+              </button>
+            </div>
+          </div>
         </div>
         <div class="gallery-band"></div>
       </section>
@@ -412,6 +464,21 @@
         <p class="thankyou-title">Gracias por tu respuesta</p>
         <p class="thankyou-subtitle">Te esperamos con ilusión</p>
       </div>
+    </div>
+
+    <div class="gallery-lightbox" id="gallery-lightbox" aria-hidden="true">
+      <button
+        class="gallery-lightbox-close"
+        id="gallery-lightbox-close"
+        type="button"
+        aria-label="Cerrar foto"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 6l12 12"></path>
+          <path d="M18 6l-12 12"></path>
+        </svg>
+      </button>
+      <img id="gallery-lightbox-image" alt="" />
     </div>
 
     <button

@@ -19,6 +19,11 @@ const allergiesToggle = document.getElementById("allergies-toggle");
 const allergiesField = document.getElementById("allergies-field");
 const allergiesInput = document.getElementById("allergies");
 const thankyouOverlay = document.getElementById("thankyou-overlay");
+const galleryScroll = document.querySelector(".gallery-scroll");
+const galleryTrack = document.getElementById("gallery-track");
+const galleryLightbox = document.getElementById("gallery-lightbox");
+const galleryLightboxImage = document.getElementById("gallery-lightbox-image");
+const galleryLightboxClose = document.getElementById("gallery-lightbox-close");
 const songForm = document.getElementById("song-form");
 const songInput = document.getElementById("song-title");
 const songSuggestions = document.getElementById("song-suggestions");
@@ -277,6 +282,102 @@ const setupCountdown = () => {
 };
 
 setupCountdown();
+
+const openGalleryLightbox = (src, alt) => {
+  if (!galleryLightbox || !galleryLightboxImage) {
+    return;
+  }
+  galleryLightboxImage.src = src;
+  galleryLightboxImage.alt = alt || "Recuerdo de la boda";
+  galleryLightbox.classList.add("is-active");
+  galleryLightbox.setAttribute("aria-hidden", "false");
+  document.body.classList.add("overlay-open");
+};
+
+const closeGalleryLightbox = () => {
+  if (!galleryLightbox || !galleryLightboxImage) {
+    return;
+  }
+  galleryLightbox.classList.remove("is-active");
+  galleryLightbox.setAttribute("aria-hidden", "true");
+  galleryLightboxImage.src = "";
+  if (!thankyouOverlay || !thankyouOverlay.classList.contains("is-active")) {
+    document.body.classList.remove("overlay-open");
+  }
+};
+
+if (galleryTrack && galleryLightbox && galleryLightboxImage) {
+  galleryTrack.addEventListener("click", (event) => {
+    const button = event.target.closest(".gallery-thumb");
+    if (!button) {
+      return;
+    }
+    const image = button.querySelector("img");
+    if (!image) {
+      return;
+    }
+    const fullSrc = button.dataset.full || image.src;
+    openGalleryLightbox(fullSrc, image.alt);
+  });
+}
+
+if (galleryLightboxClose) {
+  galleryLightboxClose.addEventListener("click", closeGalleryLightbox);
+}
+
+if (galleryLightbox) {
+  galleryLightbox.addEventListener("click", (event) => {
+    if (event.target === galleryLightbox) {
+      closeGalleryLightbox();
+    }
+  });
+}
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    closeGalleryLightbox();
+  }
+});
+
+const setupGalleryAutoScroll = () => {
+  if (!galleryScroll || reduceMotion) {
+    return;
+  }
+  let paused = false;
+  let pauseTimer = null;
+
+  const pause = (duration = 3200) => {
+    paused = true;
+    if (pauseTimer) {
+      window.clearTimeout(pauseTimer);
+    }
+    pauseTimer = window.setTimeout(() => {
+      paused = false;
+    }, duration);
+  };
+
+  const handlePause = () => pause(3600);
+  galleryScroll.addEventListener("wheel", handlePause, { passive: true });
+  galleryScroll.addEventListener("touchstart", handlePause, { passive: true });
+  galleryScroll.addEventListener("pointerdown", handlePause);
+
+  const step = () => {
+    if (!paused) {
+      const maxScroll = galleryScroll.scrollWidth - galleryScroll.clientWidth;
+      if (maxScroll > 1) {
+        galleryScroll.scrollLeft += 0.35;
+        if (galleryScroll.scrollLeft >= maxScroll) {
+          galleryScroll.scrollLeft = 0;
+        }
+      }
+    }
+    window.requestAnimationFrame(step);
+  };
+
+  window.requestAnimationFrame(step);
+};
+
+setupGalleryAutoScroll();
 
 const hideSongSuggestions = () => {
   if (!songSuggestions) {
