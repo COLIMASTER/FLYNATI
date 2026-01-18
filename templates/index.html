@@ -415,7 +415,13 @@
         <div class="rsvp-glow"></div>
       </section>
 
-      <section class="section mischief" id="mala-idea" style="--layer: 9" aria-label="Mala idea">
+      <section
+        class="section mischief"
+        id="mala-idea"
+        style="--layer: 9"
+        aria-label="Mala idea"
+        {% if not mischief_enabled %}hidden{% endif %}
+      >
         <div class="section-inner">
           <div class="mala-card reveal">
             <p class="mala-label">Mala idea</p>

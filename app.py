@@ -95,6 +95,14 @@ def init_db() -> None:
         )
         conn.execute(
             """
+            CREATE TABLE IF NOT EXISTS site_settings (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL
+            )
+            """
+        )
+        conn.execute(
+            """
             CREATE TABLE IF NOT EXISTS game_state (
                 id INTEGER PRIMARY KEY CHECK (id = 1),
                 challenge_index INTEGER NOT NULL,
@@ -139,6 +147,12 @@ def init_db() -> None:
                 """,
                 (created_at,),
             )
+        conn.execute(
+            """
+            INSERT OR IGNORE INTO site_settings (key, value)
+            VALUES ('mischief_enabled', '1')
+            """
+        )
         conn.commit()
 
 
@@ -146,6 +160,16 @@ def db_connection() -> sqlite3.Connection:
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
+
+
+def get_setting(conn: sqlite3.Connection, key: str, default: str = "") -> str:
+    row = conn.execute(
+        "SELECT value FROM site_settings WHERE key = ?",
+        (key,),
+    ).fetchone()
+    if not row:
+        return default
+    return row["value"]
 
 
 def admin_key_ok(key: str) -> bool:
@@ -236,14 +260,24 @@ def send_email_notification(payload: dict) -> None:
 
 @app.get("/")
 def index():
-    return render_template("index.html")
+    with db_connection() as conn:
+        setting = get_setting(conn, "mischief_enabled", "1")
+    mischief_enabled = setting != "0"
+    return render_template("index.html", mischief_enabled=mischief_enabled)
 
 
 @app.get("/admin")
 def admin():
     key = request.args.get("key", "")
     if admin_key_ok(key):
-        return render_template("admin.html", admin_key=key)
+        with db_connection() as conn:
+            setting = get_setting(conn, "mischief_enabled", "1")
+        mischief_enabled = setting != "0"
+        return render_template(
+            "admin.html",
+            admin_key=key,
+            mischief_enabled=mischief_enabled,
+        )
     return render_template("admin_login.html", admin_key_required=bool(ADMIN_KEY))
 
 
@@ -425,6 +459,26 @@ def vote_song():
         conn.commit()
 
     return jsonify({"ok": True})
+
+
+@app.post("/api/settings/mischief")
+def update_mischief_setting():
+    key = request.args.get("key", "")
+    if not admin_key_ok(key):
+        abort(403)
+    data = request.get_json(silent=True) or {}
+    enabled = bool(data.get("enabled"))
+    value = "1" if enabled else "0"
+    with db_connection() as conn:
+        conn.execute(
+            """
+            INSERT OR REPLACE INTO site_settings (key, value)
+            VALUES ('mischief_enabled', ?)
+            """,
+            (value,),
+        )
+        conn.commit()
+    return jsonify({"ok": True, "enabled": enabled})
 
 
 @app.get("/api/game")

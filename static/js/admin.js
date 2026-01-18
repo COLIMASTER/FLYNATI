@@ -6,6 +6,16 @@ const statYes = document.getElementById("stat-yes");
 const statNo = document.getElementById("stat-no");
 const statBus = document.getElementById("stat-bus");
 const lastUpdate = document.getElementById("last-update");
+const mischiefToggle = document.getElementById("mischief-toggle");
+
+const updateMischiefToggle = (enabled) => {
+  if (!mischiefToggle) {
+    return;
+  }
+  mischiefToggle.dataset.enabled = enabled ? "true" : "false";
+  mischiefToggle.setAttribute("aria-pressed", enabled ? "true" : "false");
+  mischiefToggle.textContent = enabled ? "Encendido" : "Apagado";
+};
 
 const handleDelete = async (event) => {
   const button = event.target.closest(".delete-btn");
@@ -117,6 +127,36 @@ if (refreshButton) {
 
 if (tbody) {
   tbody.addEventListener("click", handleDelete);
+}
+
+if (mischiefToggle) {
+  updateMischiefToggle(mischiefToggle.dataset.enabled === "true");
+  mischiefToggle.addEventListener("click", async () => {
+    const nextEnabled = mischiefToggle.dataset.enabled !== "true";
+    mischiefToggle.disabled = true;
+    try {
+      const response = await fetch(
+        `/api/settings/mischief?key=${encodeURIComponent(key)}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ enabled: nextEnabled }),
+        }
+      );
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || "No se pudo actualizar");
+      }
+      const data = await response.json().catch(() => ({}));
+      updateMischiefToggle(Boolean(data.enabled));
+    } catch (error) {
+      if (lastUpdate) {
+        lastUpdate.textContent = error.message;
+      }
+    } finally {
+      mischiefToggle.disabled = false;
+    }
+  });
 }
 
 loadRsvps();

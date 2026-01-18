@@ -52,6 +52,23 @@
         </div>
       </section>
 
+      <section class="admin-toggle" aria-label="Control de Mala idea">
+        <div>
+          <p class="eyebrow">Mala idea</p>
+          <h2>Mostrar sección en la web</h2>
+          <p class="admin-text">Activa o desactiva la sección sin cambiar el juego.</p>
+        </div>
+        <button
+          class="toggle-btn"
+          id="mischief-toggle"
+          type="button"
+          data-enabled="{{ 'true' if mischief_enabled else 'false' }}"
+          aria-pressed="{{ 'true' if mischief_enabled else 'false' }}"
+        >
+          {{ "Encendido" if mischief_enabled else "Apagado" }}
+        </button>
+      </section>
+
       <section class="admin-table">
         <table>
           <thead>
