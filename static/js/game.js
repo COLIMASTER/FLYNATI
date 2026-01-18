@@ -6,6 +6,7 @@ const statusEl = document.getElementById("game-status");
 const challengeEl = document.getElementById("game-challenge");
 const instructionEl = document.getElementById("game-instruction");
 const advanceButton = document.getElementById("game-advance");
+const resetButton = document.getElementById("game-reset");
 const alertEl = document.getElementById("game-alert");
 const alertTitle = document.getElementById("game-alert-title");
 const lastUpdate = document.getElementById("game-last-update");
@@ -84,6 +85,34 @@ if (advanceButton) {
       if (!response.ok) {
         const data = await response.json().catch(() => ({}));
         throw new Error(data.error || "No se pudo avanzar el reto");
+      }
+      const data = await response.json().catch(() => ({}));
+      if (data && data.state) {
+        updateUI(data.state);
+      } else {
+        await loadState();
+      }
+      if (lastUpdate) {
+        lastUpdate.textContent = new Date().toLocaleString("es-ES");
+      }
+    } catch (error) {
+      if (lastUpdate) {
+        lastUpdate.textContent = error.message;
+      }
+    }
+  });
+}
+
+if (resetButton) {
+  resetButton.addEventListener("click", async () => {
+    try {
+      const response = await fetch(
+        `/api/game/reset?key=${encodeURIComponent(key)}`,
+        { method: "POST" }
+      );
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || "No se pudo reiniciar el juego");
       }
       const data = await response.json().catch(() => ({}));
       if (data && data.state) {

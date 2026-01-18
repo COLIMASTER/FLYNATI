@@ -84,6 +84,17 @@ def init_db() -> None:
         )
         conn.execute(
             """
+            CREATE TABLE IF NOT EXISTS song_votes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                song_id INTEGER NOT NULL,
+                ip TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                UNIQUE(ip)
+            )
+            """
+        )
+        conn.execute(
+            """
             CREATE TABLE IF NOT EXISTS game_state (
                 id INTEGER PRIMARY KEY CHECK (id = 1),
                 challenge_index INTEGER NOT NULL,
@@ -317,32 +328,55 @@ def create_song():
     normalized_title = normalize_text(title)
 
     created_at = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    ip = client_ip()
 
     with db_connection() as conn:
+        existing_vote = conn.execute(
+            "SELECT 1 FROM song_votes WHERE ip = ?",
+            (ip,),
+        ).fetchone()
+        if existing_vote:
+            return jsonify({"ok": False, "error": "Ya has votado"}), 400
+
         existing_rows = conn.execute(
             "SELECT id, title, votes, created_at FROM songs"
         ).fetchall()
         for existing in existing_rows:
             if normalize_text(existing["title"]) == normalized_title:
-                return jsonify(
-                    {
-                        "ok": True,
-                        "item": {
-                            "id": existing["id"],
-                            "title": existing["title"],
-                            "votes": int(existing["votes"]),
-                            "created_at": existing["created_at"],
-                        },
-                    }
+                conn.execute(
+                    "UPDATE songs SET votes = votes + 1 WHERE id = ?",
+                    (existing["id"],),
                 )
+                try:
+                    conn.execute(
+                        """
+                        INSERT INTO song_votes (song_id, ip, created_at)
+                        VALUES (?, ?, ?)
+                        """,
+                        (existing["id"], ip, created_at),
+                    )
+                except sqlite3.IntegrityError:
+                    return jsonify({"ok": False, "error": "Ya has votado"}), 400
+                conn.commit()
+                return jsonify({"ok": True})
 
-        conn.execute(
+        cursor = conn.execute(
             """
             INSERT INTO songs (title, votes, created_at)
             VALUES (?, ?, ?)
             """,
-            (title, 0, created_at),
+            (title, 1, created_at),
         )
+        try:
+            conn.execute(
+                """
+                INSERT INTO song_votes (song_id, ip, created_at)
+                VALUES (?, ?, ?)
+                """,
+                (cursor.lastrowid, ip, created_at),
+            )
+        except sqlite3.IntegrityError:
+            return jsonify({"ok": False, "error": "Ya has votado"}), 400
         conn.commit()
 
     return jsonify({"ok": True})
@@ -354,19 +388,40 @@ def vote_song():
     try:
         song_id = int(data.get("id"))
     except (TypeError, ValueError):
-        return jsonify({"ok": False, "error": "ID inválido"}), 400
+        return jsonify({"ok": False, "error": "ID inv?lido"}), 400
+    ip = client_ip()
 
     with db_connection() as conn:
+        existing_vote = conn.execute(
+            "SELECT 1 FROM song_votes WHERE ip = ?",
+            (ip,),
+        ).fetchone()
+        if existing_vote:
+            return jsonify({"ok": False, "error": "Ya has votado"}), 400
         row = conn.execute(
             "SELECT id FROM songs WHERE id = ?",
             (song_id,),
         ).fetchone()
         if not row:
-            return jsonify({"ok": False, "error": "Canción no encontrada"}), 404
+            return jsonify({"ok": False, "error": "Canci?n no encontrada"}), 404
         conn.execute(
             "UPDATE songs SET votes = votes + 1 WHERE id = ?",
             (song_id,),
         )
+        try:
+            conn.execute(
+                """
+                INSERT INTO song_votes (song_id, ip, created_at)
+                VALUES (?, ?, ?)
+                """,
+                (
+                    song_id,
+                    ip,
+                    datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC"),
+                ),
+            )
+        except sqlite3.IntegrityError:
+            return jsonify({"ok": False, "error": "Ya has votado"}), 400
         conn.commit()
 
     return jsonify({"ok": True})
@@ -431,6 +486,27 @@ def advance_game():
             """,
             (next_index, next_round, updated_at),
         )
+        conn.commit()
+        state = build_game_state(conn)
+    return jsonify({"ok": True, "state": state})
+
+
+@app.post("/api/game/reset")
+def reset_game():
+    key = request.args.get("key", "")
+    if not admin_key_ok(key):
+        abort(403)
+    updated_at = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    with db_connection() as conn:
+        conn.execute(
+            """
+            UPDATE game_state
+            SET challenge_index = 0, round_index = 1, updated_at = ?
+            WHERE id = 1
+            """,
+            (updated_at,),
+        )
+        conn.execute("DELETE FROM game_votes")
         conn.commit()
         state = build_game_state(conn)
     return jsonify({"ok": True, "state": state})

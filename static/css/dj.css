@@ -86,7 +86,7 @@ body.dj-body {
 
 .dj-section {
   background: var(--panel);
-  padding: 28px;
+  padding: 20px;
   border-radius: var(--radius);
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: var(--shadow);
@@ -95,14 +95,14 @@ body.dj-body {
 
 .dj-section h2 {
   font-family: "Fraunces", serif;
-  font-size: 1.6rem;
-  margin-bottom: 18px;
+  font-size: 1.35rem;
+  margin-bottom: 14px;
 }
 
 .dj-top-list {
   list-style: none;
   display: grid;
-  gap: 12px;
+  gap: 8px;
   padding: 0;
   margin: 0;
 }
@@ -110,24 +110,25 @@ body.dj-body {
 .dj-top-item {
   display: grid;
   grid-template-columns: auto 1fr auto;
-  gap: 16px;
+  gap: 12px;
   align-items: center;
-  padding: 16px 18px;
-  border-radius: 18px;
+  padding: 10px 12px;
+  border-radius: 12px;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .dj-rank {
-  width: 42px;
-  height: 42px;
-  border-radius: 14px;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
   display: grid;
   place-items: center;
   font-weight: 600;
   background: rgba(200, 164, 112, 0.18);
   border: 1px solid rgba(200, 164, 112, 0.35);
   color: #f6e8d6;
+  font-size: 0.75rem;
 }
 
 .dj-song {
@@ -138,23 +139,24 @@ body.dj-body {
 
 .dj-song-title {
   font-weight: 600;
+  font-size: 0.95rem;
 }
 
 .dj-song-votes {
-  font-size: 0.7rem;
-  letter-spacing: 0.18em;
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--text-muted);
 }
 
 .dj-all-list {
   display: grid;
-  gap: 12px;
+  gap: 8px;
 }
 
 .dj-bar {
-  padding: 14px 16px;
-  border-radius: 16px;
+  padding: 10px 12px;
+  border-radius: 12px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
@@ -164,22 +166,23 @@ body.dj-body {
   justify-content: space-between;
   align-items: baseline;
   gap: 12px;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .dj-bar-title {
   font-weight: 600;
+  font-size: 0.95rem;
 }
 
 .dj-bar-votes {
-  font-size: 0.75rem;
+  font-size: 0.62rem;
   color: var(--text-muted);
-  letter-spacing: 0.16em;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
 .dj-bar-track {
-  height: 10px;
+  height: 6px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.08);
   overflow: hidden;
