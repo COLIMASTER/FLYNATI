@@ -1,0 +1,82 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panel de invitados | Alfonso & Natalia</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600;9..144,700&family=Manrope:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}" />
+  </head>
+  <body class="admin-body">
+    <div class="admin-shell wide">
+      <header class="admin-header">
+        <div>
+          <p class="eyebrow">Panel privado</p>
+          <h1>Invitados registrados</h1>
+          <p class="admin-text">Actualiza en tiempo real y exporta a CSV.</p>
+        </div>
+        <div class="admin-actions">
+          <button class="btn btn-outline" id="refresh">Actualizar</button>
+          <a class="btn btn-outline" href="/">Volver a la web</a>
+          <a class="btn btn-outline" href="/admin/game?key={{ admin_key }}" target="_blank" rel="noopener">
+            Juego
+          </a>
+          <a class="btn btn-outline" href="/dj?key={{ admin_key }}" target="_blank" rel="noopener">
+            Vista DJ
+          </a>
+          <a class="btn" href="/admin/export?key={{ admin_key }}">Exportar CSV</a>
+        </div>
+      </header>
+
+      <section class="admin-stats">
+        <div class="stat-card">
+          <p>Total</p>
+          <h2 id="stat-total">0</h2>
+        </div>
+        <div class="stat-card">
+          <p>Asisten</p>
+          <h2 id="stat-yes">0</h2>
+        </div>
+        <div class="stat-card">
+          <p>No asisten</p>
+          <h2 id="stat-no">0</h2>
+        </div>
+        <div class="stat-card">
+          <p>Autobús</p>
+          <h2 id="stat-bus">0</h2>
+        </div>
+      </section>
+
+      <section class="admin-table">
+        <table>
+          <thead>
+            <tr>
+          <th>ID</th>
+          <th>Nombre</th>
+          <th>Asiste</th>
+          <th>Dirección</th>
+          <th>Autobús</th>
+          <th>Alergias</th>
+          <th>Mensaje</th>
+          <th>Fecha</th>
+          <th></th>
+        </tr>
+      </thead>
+          <tbody id="rsvp-body"></tbody>
+        </table>
+      </section>
+
+      <p class="admin-foot">Última actualización: <span id="last-update">--</span></p>
+    </div>
+
+    <script>
+      window.ADMIN_KEY = "{{ admin_key }}";
+    </script>
+    <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+  </body>
+</html>

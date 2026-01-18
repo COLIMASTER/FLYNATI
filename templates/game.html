@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Juego | Alfonso & Natalia</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,600;9..144,700&family=Manrope:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}" />
+  </head>
+  <body class="admin-body">
+    <div class="admin-shell wide">
+      <header class="admin-header">
+        <div>
+          <p class="eyebrow">Panel juego</p>
+          <h1>Control del reto</h1>
+          <p class="admin-text">Sigue el contador y avanza al siguiente reto.</p>
+        </div>
+        <div class="admin-actions">
+          <button class="btn btn-outline" id="game-refresh">Actualizar</button>
+          <a class="btn btn-outline" href="/admin?key={{ admin_key }}">Panel invitados</a>
+          <a class="btn btn-outline" href="/dj?key={{ admin_key }}" target="_blank" rel="noopener">
+            Vista DJ
+          </a>
+          <a class="btn btn-outline" href="/">Volver a la web</a>
+        </div>
+      </header>
+
+      <section class="game-alert" id="game-alert" hidden>
+        <p>Atención DJ</p>
+        <h2 id="game-alert-title">Próximo reto musical</h2>
+      </section>
+
+      <section class="admin-stats game-stats">
+        <div class="stat-card">
+          <p>Votos</p>
+          <h2 id="game-count">0</h2>
+        </div>
+        <div class="stat-card">
+          <p>Faltan</p>
+          <h2 id="game-remaining">0</h2>
+        </div>
+        <div class="stat-card">
+          <p>Reto</p>
+          <h2 id="game-status">--</h2>
+        </div>
+      </section>
+
+      <section class="game-panel">
+        <div class="game-card">
+          <p class="eyebrow">Reto actual</p>
+          <h2 id="game-challenge">--</h2>
+          <p class="game-instruction" id="game-instruction"></p>
+        </div>
+        <button class="btn game-advance" id="game-advance" type="button">
+          Pasar al siguiente reto
+        </button>
+        <p class="admin-foot">Última actualización: <span id="game-last-update">--</span></p>
+      </section>
+    </div>
+
+    <script>
+      window.ADMIN_KEY = "{{ admin_key }}";
+    </script>
+    <script src="{{ url_for('static', filename='js/game.js') }}"></script>
+  </body>
+</html>
