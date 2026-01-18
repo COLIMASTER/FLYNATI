@@ -27,6 +27,7 @@ const songTabs = document.querySelectorAll("[data-song-view]");
 const mischiefButton = document.getElementById("mala-button");
 const mischiefHint = document.getElementById("mala-hint");
 const mischiefNote = document.getElementById("mala-note");
+const mischiefDefaultHint = mischiefHint ? mischiefHint.textContent : "";
 let introOpened = false;
 let audioEnabled = true;
 let thankyouTimer = null;
@@ -513,14 +514,23 @@ if (songList) {
 }
 
 const updateMischiefUI = (state) => {
-  if (!mischiefButton) {
+  if (!mischiefButton || !mischiefHint) {
     return;
   }
   const active = Boolean(state && state.challenge_active);
 
   mischiefButton.hidden = active;
-
   mischiefButton.disabled = active;
+
+  if (active) {
+    const label = state && state.challenge ? `Reto: ${state.challenge}` : "Reto";
+    const instruction = state && state.instruction ? state.instruction : "";
+    mischiefHint.textContent = instruction ? `${label}\n${instruction}` : label;
+    mischiefHint.classList.add("is-active");
+  } else {
+    mischiefHint.textContent = mischiefDefaultHint;
+    mischiefHint.classList.remove("is-active");
+  }
 
   if (mischiefNote) {
     mischiefNote.textContent = "";

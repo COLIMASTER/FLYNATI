@@ -2286,6 +2286,16 @@ main {
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.6);
   font-style: normal;
+  white-space: pre-line;
+}
+
+.mala-hint.is-active {
+  color: #ffe3d6;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 12px 16px;
+  border-radius: 14px;
+  letter-spacing: 0.08em;
 }
 
 .mala-challenge {
@@ -2559,7 +2569,8 @@ main {
   .hero-actions {
     flex-direction: column;
     align-items: center;
-    margin-top: 6px;
+    margin-top: auto;
+    margin-bottom: 8vh;
   }
 
   .hero-top {
@@ -2569,23 +2580,23 @@ main {
 
   .hero-date {
     font-size: 0.75rem;
-    margin-top: 8px;
+    margin-top: 10px;
   }
 
   .hero-title {
-    margin-top: 2vh;
+    margin-top: 1vh;
   }
 
   .hero-content {
     min-height: 100svh;
-    padding: 10vh 6vw 8vh;
-    gap: 12px;
+    padding: 8vh 6vw 8vh;
+    gap: 10px;
   }
 
   .scroll-indicator {
     width: 38px;
     height: 38px;
-    bottom: 2vh;
+    bottom: 8vh;
   }
 
   .timeline-item {
