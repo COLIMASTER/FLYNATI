@@ -218,8 +218,8 @@ a {
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.admin-table th:nth-child(8),
-.admin-table td:nth-child(8) {
+.admin-table th:nth-child(12),
+.admin-table td:nth-child(12) {
   white-space: nowrap;
   min-width: 160px;
 }

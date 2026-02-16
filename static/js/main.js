@@ -14,7 +14,18 @@ const countdownSeconds = document.getElementById("countdown-seconds");
 const attendingToggle = document.getElementById("attending");
 const attendingFields = document.getElementById("attending-fields");
 const attendingNote = document.getElementById("attending-note");
-const addressInput = document.getElementById("address");
+const partyTypeField = document.getElementById("party-type-field");
+const partyTypeRadios = document.querySelectorAll("input[name='party-type']");
+const partnerField = document.getElementById("partner-field");
+const partnerInput = document.getElementById("partner-name");
+const familyField = document.getElementById("family-field");
+const familyList = document.getElementById("family-list");
+const addFamilyButton = document.getElementById("add-family");
+const busToggle = document.getElementById("bus");
+const busStopField = document.getElementById("bus-stop-field");
+const busStopOptions = document.querySelectorAll("input[name='bus-stop']");
+const privateTransportField = document.getElementById("private-transport-field");
+const privateTransportToggle = document.getElementById("private-transport");
 const allergiesToggle = document.getElementById("allergies-toggle");
 const allergiesField = document.getElementById("allergies-field");
 const allergiesInput = document.getElementById("allergies");
@@ -90,6 +101,147 @@ if (soundToggle) {
   });
 }
 
+const getPartyType = () => {
+  if (!partyTypeRadios.length) {
+    return "solo";
+  }
+  const selected = Array.from(partyTypeRadios).find((radio) => radio.checked);
+  return selected ? selected.value : "solo";
+};
+
+const createFamilyRow = () => {
+  const row = document.createElement("div");
+  row.className = "family-row";
+  const input = document.createElement("input");
+  input.className = "family-member";
+  input.type = "text";
+  input.name = "family-members";
+  input.placeholder = "Nombre y apellidos";
+  const removeButton = document.createElement("button");
+  removeButton.className = "family-remove";
+  removeButton.type = "button";
+  removeButton.textContent = "Quitar";
+  row.appendChild(input);
+  row.appendChild(removeButton);
+  return row;
+};
+
+const ensureFamilyRow = () => {
+  if (!familyList) {
+    return;
+  }
+  const inputs = familyList.querySelectorAll("input");
+  if (!inputs.length) {
+    familyList.appendChild(createFamilyRow());
+  }
+};
+
+const resetFamilyRows = () => {
+  if (!familyList) {
+    return;
+  }
+  familyList.innerHTML = "";
+  familyList.appendChild(createFamilyRow());
+};
+
+const updatePartyFields = () => {
+  const isAttending = attendingToggle ? attendingToggle.checked : false;
+  if (partyTypeField) {
+    partyTypeField.hidden = !isAttending;
+  }
+  if (!isAttending) {
+    if (partnerField) {
+      partnerField.hidden = true;
+    }
+    if (familyField) {
+      familyField.hidden = true;
+    }
+    if (partnerInput) {
+      partnerInput.required = false;
+      partnerInput.value = "";
+    }
+    if (familyList) {
+      familyList.querySelectorAll("input").forEach((input) => {
+        input.required = false;
+        input.value = "";
+      });
+    }
+    return;
+  }
+
+  const partyType = getPartyType();
+  const isCouple = partyType === "pareja";
+  const isFamily = partyType === "familia";
+
+  if (partnerField) {
+    partnerField.hidden = !isCouple;
+  }
+  if (partnerInput) {
+    partnerInput.required = isCouple;
+    if (!isCouple) {
+      partnerInput.value = "";
+    }
+  }
+  if (familyField) {
+    familyField.hidden = !isFamily;
+  }
+  if (familyList) {
+    ensureFamilyRow();
+    const inputs = familyList.querySelectorAll("input");
+    inputs.forEach((input, index) => {
+      input.required = isFamily && index === 0;
+      if (!isFamily) {
+        input.value = "";
+      }
+    });
+  }
+};
+
+const updateBusFields = () => {
+  const isAttending = attendingToggle ? attendingToggle.checked : false;
+  const usesBus = Boolean(isAttending && busToggle && busToggle.checked);
+
+  if (busStopField) {
+    busStopField.hidden = !usesBus;
+  }
+  if (busStopOptions.length) {
+    busStopOptions.forEach((option) => {
+      option.required = usesBus;
+      if (!usesBus) {
+        option.checked = false;
+      }
+    });
+  }
+
+  const needsPrivateTransport = Boolean(
+    isAttending && busToggle && !busToggle.checked
+  );
+  if (privateTransportField) {
+    privateTransportField.hidden = !needsPrivateTransport;
+  }
+  if (privateTransportToggle && !needsPrivateTransport) {
+    privateTransportToggle.checked = false;
+  }
+};
+
+const updateAllergiesField = () => {
+  const enabled = Boolean(
+    attendingToggle &&
+      attendingToggle.checked &&
+      allergiesToggle &&
+      allergiesToggle.checked
+  );
+  if (allergiesField) {
+    allergiesField.hidden = !enabled;
+  }
+  if (allergiesInput) {
+    allergiesInput.required = enabled;
+    if (!enabled) {
+      allergiesInput.value = "";
+    }
+  }
+};
+
 const updateAttendingFields = () => {
   if (!attendingToggle) {
     return;
@@ -101,32 +253,20 @@ const updateAttendingFields = () => {
   if (attendingNote) {
     attendingNote.hidden = isAttending;
   }
-  if (addressInput) {
-    addressInput.required = isAttending;
-  }
   if (!isAttending) {
     if (allergiesToggle) {
       allergiesToggle.checked = false;
     }
-    if (allergiesInput) {
-      allergiesInput.required = false;
-      allergiesInput.value = "";
-    }
-    if (allergiesField) {
-      allergiesField.hidden = true;
-    }
-  } else if (allergiesField && allergiesToggle) {
-    allergiesField.hidden = !allergiesToggle.checked;
-    if (allergiesInput) {
-      allergiesInput.required = allergiesToggle.checked;
-    }
-  }
-  if (!isAttending) {
-    const busToggle = document.getElementById("bus");
     if (busToggle) {
       busToggle.checked = false;
     }
+    if (privateTransportToggle) {
+      privateTransportToggle.checked = false;
+    }
   }
+  updatePartyFields();
+  updateBusFields();
+  updateAllergiesField();
 };
 
 if (attendingToggle) {
@@ -134,17 +274,42 @@ if (attendingToggle) {
   attendingToggle.addEventListener("change", updateAttendingFields);
 }
 
+if (partyTypeRadios.length) {
+  partyTypeRadios.forEach((radio) => {
+    radio.addEventListener("change", updatePartyFields);
+  });
+}
+
+if (busToggle) {
+  busToggle.addEventListener("change", updateBusFields);
+}
+
 if (allergiesToggle) {
-  allergiesToggle.addEventListener("change", () => {
-    if (allergiesField) {
-      allergiesField.hidden = !allergiesToggle.checked;
+  allergiesToggle.addEventListener("change", updateAllergiesField);
+}
+
+if (addFamilyButton) {
+  addFamilyButton.addEventListener("click", () => {
+    if (!familyList) {
+      return;
     }
-    if (allergiesInput) {
-      allergiesInput.required = allergiesToggle.checked;
-      if (!allergiesToggle.checked) {
-        allergiesInput.value = "";
-      }
+    familyList.appendChild(createFamilyRow());
+    updatePartyFields();
+  });
+}
+
+if (familyList) {
+  familyList.addEventListener("click", (event) => {
+    const removeButton = event.target.closest(".family-remove");
+    if (!removeButton) {
+      return;
     }
+    const row = removeButton.closest(".family-row");
+    if (row) {
+      row.remove();
+    }
+    ensureFamilyRow();
+    updatePartyFields();
   });
 }
 
@@ -378,6 +543,50 @@ const setupGalleryAutoScroll = () => {
 };
 
 setupGalleryAutoScroll();
+
+const uploadButton = document.querySelector(".upload-btn");
+const uploadWrapper = document.querySelector(".upload-disabled");
+const uploadNote = document.querySelector(".upload-note");
+
+const setUploadState = (enabled) => {
+  if (!uploadButton) {
+    return;
+  }
+  if (enabled) {
+    uploadButton.classList.remove("is-disabled");
+    uploadButton.dataset.disabled = "false";
+    uploadButton.setAttribute("aria-disabled", "false");
+    if (uploadWrapper) {
+      uploadWrapper.dataset.disabled = "false";
+      uploadWrapper.removeAttribute("title");
+    }
+    if (uploadNote) {
+      uploadNote.textContent = "Disponible.";
+    }
+  } else {
+    uploadButton.classList.add("is-disabled");
+    uploadButton.dataset.disabled = "true";
+    uploadButton.setAttribute("aria-disabled", "true");
+    if (uploadWrapper) {
+      uploadWrapper.dataset.disabled = "true";
+    }
+  }
+};
+
+if (uploadButton) {
+  const availableDate = uploadButton.dataset.available;
+  let enabled = false;
+  if (availableDate) {
+    const target = new Date(`${availableDate}T00:00:00`);
+    enabled = !Number.isNaN(target.getTime()) && Date.now() >= target.getTime();
+  }
+  setUploadState(enabled);
+  if (!enabled) {
+    uploadButton.addEventListener("click", (event) => {
+      event.preventDefault();
+    });
+  }
+}
 
 const hideSongSuggestions = () => {
   if (!songSuggestions) {
@@ -686,6 +895,23 @@ if (mischiefButton) {
   gameRefreshTimer = window.setInterval(loadMischiefState, 7000);
 }
 
+const getFamilyMembers = () => {
+  if (!familyList) {
+    return [];
+  }
+  return Array.from(familyList.querySelectorAll("input"))
+    .map((input) => input.value.trim())
+    .filter(Boolean);
+};
+
+const getBusStop = () => {
+  if (!busStopOptions.length) {
+    return "";
+  }
+  const selected = Array.from(busStopOptions).find((option) => option.checked);
+  return selected ? selected.value : "";
+};
+
 const form = document.getElementById("rsvp-form");
 const note = document.getElementById("form-note");
 
@@ -695,7 +921,10 @@ if (form) {
     const button = form.querySelector("button[type='submit']");
 
     const attending = attendingToggle ? attendingToggle.checked : false;
-    const busToggle = document.getElementById("bus");
+    const partyType = getPartyType();
+    const isCouple = partyType === "pareja";
+    const isFamily = partyType === "familia";
+    const busEnabled = Boolean(attending && busToggle && busToggle.checked);
     const allergiesEnabled = Boolean(
       attending && allergiesToggle && allergiesToggle.checked
     );
@@ -706,8 +935,16 @@ if (form) {
     const payload = {
       name: document.getElementById("guest-name").value.trim(),
       attending,
-      address: attending && addressInput ? addressInput.value.trim() : "",
-      bus: attending ? Boolean(busToggle && busToggle.checked) : false,
+      party_type: attending ? partyType : "solo",
+      partner_name:
+        attending && isCouple && partnerInput ? partnerInput.value.trim() : "",
+      family_members: attending && isFamily ? getFamilyMembers() : [],
+      bus: busEnabled,
+      bus_stop: busEnabled ? getBusStop() : "",
+      private_transport:
+        attending && !busEnabled && privateTransportToggle
+          ? privateTransportToggle.checked
+          : false,
       allergies:
         attending && allergiesEnabled && allergiesInput
           ? allergiesInput.value.trim()
@@ -732,6 +969,7 @@ if (form) {
       }
 
       form.reset();
+      resetFamilyRows();
       if (attendingToggle) {
         attendingToggle.checked = true;
       }

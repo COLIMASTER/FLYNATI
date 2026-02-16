@@ -54,7 +54,6 @@
 
     <nav class="site-nav" aria-label="Navegación principal">
       <a href="#ubicacion">Ubicación</a>
-      <a href="#agenda">Agenda</a>
       <a href="#dj">Canciones</a>
       <a href="#galeria">Recuerdos</a>
     </nav>
@@ -139,11 +138,20 @@
               </div>
               <div>
                 <p class="label">Contacto</p>
-                <p>+34 600 000 000</p>
+                <div class="contact-list">
+                  <div class="contact-item">
+                    <span class="contact-name">Alfonso</span>
+                    <span class="contact-phone">654110041</span>
+                  </div>
+                  <div class="contact-item">
+                    <span class="contact-name">Natalia</span>
+                    <span class="contact-phone">671286983</span>
+                  </div>
+                </div>
               </div>
               <div>
                 <p class="label">Horario</p>
-                <p>11:00 h (aprox.)</p>
+                <p>13,00 h</p>
               </div>
             </div>
           </div>
@@ -177,45 +185,6 @@
         <div class="detail-ribbon"></div>
       </section>
 
-      <section class="section timeline" id="agenda" style="--layer: 5">
-        <div class="section-inner">
-          <div class="section-head reveal">
-            <p class="eyebrow">Agenda</p>
-            <h2>Una noche con ritmo propio</h2>
-          </div>
-          <div class="timeline-track">
-            <div class="timeline-item reveal">
-              <div class="timeline-time">17:15</div>
-              <div class="timeline-card">
-                <h3>Llegada</h3>
-                <p>Bienvenida con champagne y música ambiental.</p>
-              </div>
-            </div>
-            <div class="timeline-item reveal">
-              <div class="timeline-time">18:00</div>
-              <div class="timeline-card">
-                <h3>Votos</h3>
-                <p>Una ceremonia íntima bajo el cielo dorado.</p>
-              </div>
-            </div>
-            <div class="timeline-item reveal">
-              <div class="timeline-time">20:30</div>
-              <div class="timeline-card">
-                <h3>Banquete</h3>
-                <p>Menú degustación de temporada.</p>
-              </div>
-            </div>
-            <div class="timeline-item reveal">
-              <div class="timeline-time">23:00</div>
-              <div class="timeline-card">
-                <h3>Fiesta</h3>
-                <p>Shows de luces, barra premium y DJ.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <section class="section gallery" id="galeria" style="--layer: 6">
         <div class="section-inner">
           <div class="section-head reveal">
@@ -227,14 +196,20 @@
           </div>
           <div class="upload-card reveal">
             <p>Queremos revivir cada detalle contigo.</p>
-            <a
-              class="btn btn-primary upload-btn"
-              href="https://drive.google.com/drive/folders/1NZ-GQXaTB4TAVJ9DakM_2e5-2bgIevfW?usp=drive_link"
-              target="_blank"
-              rel="noopener"
-            >
-              Subir fotos de la boda
-            </a>
+            <div class="upload-disabled" data-disabled="true" title="Disponible a partir del 3 de mayo">
+              <a
+                class="btn btn-primary upload-btn is-disabled"
+                href="https://drive.google.com/drive/folders/1NZ-GQXaTB4TAVJ9DakM_2e5-2bgIevfW?usp=drive_link"
+                target="_blank"
+                rel="noopener"
+                data-disabled="true"
+                data-available="2026-05-03"
+                aria-disabled="true"
+              >
+                Subir fotos de la boda
+              </a>
+            </div>
+            <p class="upload-note">Disponible a partir del 3 de mayo.</p>
           </div>
           <div class="gallery-scroll reveal" aria-label="Galería de recuerdos">
             <div class="gallery-track" id="gallery-track">
@@ -345,8 +320,51 @@
               Tu respuesta nos ayuda a crear una experiencia perfecta. Completa
               el formulario y cuéntanos tus detalles.
             </p>
+            <p class="rsvp-highlight">Queremos que bebáis, riáis y bailéis sin preocupaciones.</p>
+            <p class="rsvp-highlight rsvp-highlight-strong">Así que esta vez dejad a los peques en casa.</p>
           </div>
           <form class="rsvp-form reveal" id="rsvp-form">
+            <div class="field" id="party-type-field">
+              <label>¿Cómo venís?</label>
+              <div class="choice-group" role="radiogroup" aria-label="Tipo de asistencia">
+                <label class="choice">
+                  <input type="radio" name="party-type" value="solo" checked />
+                  <span>Voy solo/a</span>
+                </label>
+                <label class="choice">
+                  <input type="radio" name="party-type" value="pareja" />
+                  <span>Voy con pareja</span>
+                </label>
+                <label class="choice">
+                  <input type="radio" name="party-type" value="familia" />
+                  <span>Voy en familia</span>
+                </label>
+              </div>
+            </div>
+            <div class="field" id="partner-field" hidden>
+              <label for="partner-name">Nombre de tu pareja</label>
+              <input
+                id="partner-name"
+                name="partner-name"
+                type="text"
+                placeholder="Nombre y apellidos"
+              />
+            </div>
+            <div class="field" id="family-field" hidden>
+              <label>Miembros de la familia</label>
+              <div class="family-list" id="family-list">
+                <div class="family-row">
+                  <input
+                    class="family-member"
+                    type="text"
+                    name="family-members"
+                    placeholder="Nombre y apellidos"
+                  />
+                  <button class="family-remove" type="button">Quitar</button>
+                </div>
+              </div>
+              <button class="btn btn-ghost add-family" id="add-family" type="button">Añadir miembro</button>
+            </div>
             <div class="field">
               <label for="guest-name">Nombre</label>
               <input id="guest-name" name="name" type="text" placeholder="Nombre y apellidos" required />
@@ -365,24 +383,51 @@
             </div>
             <p class="attending-note" id="attending-note" hidden>Muchas gracias por tu respuesta.</p>
             <div class="attending-fields" id="attending-fields">
-              <div class="field">
-                <label for="address">Dirección postal</label>
-                <input
-                  id="address"
-                  name="address"
-                  type="text"
-                  placeholder="Calle, número, ciudad"
-                  required
-                />
-              </div>
               <div class="field switches">
                 <div class="switch-row">
                   <div>
                     <p class="switch-label">Usarías el autobús ida y vuelta</p>
-                    <p class="switch-hint">Paradas aún por determinar</p>
+                    <p class="switch-hint">Si lo necesitas, elige una parada.</p>
                   </div>
                   <label class="switch">
                     <input id="bus" type="checkbox" />
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="field" id="bus-stop-field" hidden>
+                <label>Elige tu parada</label>
+                <div class="choice-group" role="radiogroup" aria-label="Parada de autobús">
+                  <label class="choice">
+                    <input type="radio" name="bus-stop" value="Coria del Rio (recogida a las 11,15)" />
+                    <span>Coria del Rio <span class="choice-meta">(recogida a las 11,15)</span></span>
+                  </label>
+                  <label class="choice">
+                    <input type="radio" name="bus-stop" value="Metro Blas Infante (recogida a las 11,45)" />
+                    <span>Metro Blas Infante <span class="choice-meta">(recogida a las 11,45)</span></span>
+                  </label>
+                  <label class="choice">
+                    <input type="radio" name="bus-stop" value="Hotel Al-Andalus Palace (recogida a las 12,15)" />
+                    <span>Hotel Al-Andalus Palace <span class="choice-meta">(recogida a las 12,15)</span></span>
+                  </label>
+                  <label class="choice">
+                    <input type="radio" name="bus-stop" value="Santa Justa (recogida a las 12,15)" />
+                    <span>Santa Justa <span class="choice-meta">(recogida a las 12,15)</span></span>
+                  </label>
+                </div>
+              </div>
+              <div class="field switches" id="private-transport-field" hidden>
+                <div class="switch-row">
+                  <div>
+                    <p class="switch-label">¿Necesitarás transporte privado?</p>
+                    <p class="switch-hint">
+                      Tendremos varios taxis disponibles para ir o volver de la Hacienda.
+                      En caso de estar interesado, marca esta opción y te contaremos más detalles y los
+                      precios que nos han hecho.
+                    </p>
+                  </div>
+                  <label class="switch">
+                    <input id="private-transport" type="checkbox" />
                     <span class="slider"></span>
                   </label>
                 </div>

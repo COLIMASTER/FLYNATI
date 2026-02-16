@@ -63,8 +63,13 @@ def init_db() -> None:
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
                 attending INTEGER NOT NULL,
+                party_type TEXT,
+                partner_name TEXT,
+                family_members TEXT,
                 address TEXT,
                 bus INTEGER NOT NULL,
+                bus_stop TEXT,
+                private_transport INTEGER,
                 allergies TEXT,
                 song TEXT,
                 message TEXT,
@@ -126,7 +131,12 @@ def init_db() -> None:
             row[1] for row in conn.execute("PRAGMA table_info(rsvps)").fetchall()
         }
         missing = {
+            "party_type": "TEXT",
+            "partner_name": "TEXT",
+            "family_members": "TEXT",
             "address": "TEXT",
+            "bus_stop": "TEXT",
+            "private_transport": "INTEGER",
             "allergies": "TEXT",
             "message": "TEXT",
         }
@@ -231,14 +241,24 @@ def send_email_notification(payload: dict) -> None:
     msg["Subject"] = "Nuevo RSVP - Alfonso y Natalia"
     msg["From"] = sender
     msg["To"] = to_addr
+    party_label = {
+        "solo": "Solo",
+        "pareja": "Con pareja",
+        "familia": "En familia",
+    }.get(payload.get("party_type"), payload.get("party_type") or "-")
+    private_label = "Si" if payload.get("private_transport") else "No"
     msg.set_content(
         "\n".join(
             [
                 "Nuevo invitado registrado:",
                 f"Nombre: {payload['name']}",
                 f"Asistira: {'Si' if payload['attending'] else 'No'}",
-                f"Direccion: {payload['address'] or '-'}",
+                f"Tipo asistencia: {party_label}",
+                f"Nombre pareja: {payload['partner_name'] or '-'}",
+                f"Familia: {payload['family_members'] or '-'}",
                 f"Necesita autobus: {'Si' if payload['bus'] else 'No'}",
+                f"Parada bus: {payload['bus_stop'] or '-'}",
+                f"Transporte privado: {private_label}",
                 f"Alergias: {payload['allergies'] or '-'}",
                 f"Mensaje: {payload['message'] or '-'}",
                 f"Fecha: {payload['created_at']}",
@@ -306,7 +326,8 @@ def list_rsvps():
     with db_connection() as conn:
         rows = conn.execute(
             """
-            SELECT id, name, attending, address, bus, allergies, message, created_at
+            SELECT id, name, attending, party_type, partner_name, family_members,
+                   bus, bus_stop, private_transport, allergies, message, created_at
             FROM rsvps
             ORDER BY id DESC
             """
@@ -317,8 +338,14 @@ def list_rsvps():
             "id": row["id"],
             "name": row["name"],
             "attending": bool(row["attending"]),
-            "address": row["address"] or "",
+            "party_type": row["party_type"] or "",
+            "partner_name": row["partner_name"] or "",
+            "family_members": row["family_members"] or "",
             "bus": bool(row["bus"]),
+            "bus_stop": row["bus_stop"] or "",
+            "private_transport": bool(row["private_transport"])
+            if row["private_transport"] is not None
+            else False,
             "allergies": row["allergies"] or "",
             "message": row["message"] or "",
             "created_at": row["created_at"],
@@ -574,17 +601,76 @@ def create_rsvp():
         return jsonify({"ok": False, "error": "Nombre requerido"}), 400
 
     attending = bool(data.get("attending"))
-    address = (data.get("address") or "").strip()
+    party_type = (data.get("party_type") or "solo").strip().lower()
+    if party_type not in {"solo", "pareja", "familia"}:
+        return jsonify({"ok": False, "error": "Tipo de asistencia inválido"}), 400
+    partner_name = (data.get("partner_name") or "").strip()
+    raw_family = data.get("family_members") or []
+    family_list = []
+    if isinstance(raw_family, list):
+        family_list = [
+            str(item).strip()
+            for item in raw_family
+            if str(item).strip()
+        ]
+    elif isinstance(raw_family, str):
+        family_list = [
+            item.strip() for item in raw_family.split(",") if item.strip()
+        ]
+    family_members = ", ".join(family_list)
     bus = bool(data.get("bus"))
+    bus_stop = (data.get("bus_stop") or "").strip()
+    private_transport = bool(data.get("private_transport"))
     allergies = (data.get("allergies") or "").strip()
     message = (data.get("message") or "").strip()
     created_at = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
 
+    if not attending:
+        party_type = "solo"
+        partner_name = ""
+        family_members = ""
+        bus = False
+        bus_stop = ""
+        private_transport = False
+
+    if party_type != "pareja":
+        partner_name = ""
+    if party_type != "familia":
+        family_members = ""
+
+    if attending:
+        if party_type == "pareja" and not partner_name:
+            return (
+                jsonify({"ok": False, "error": "Nombre de pareja requerido"}),
+                400,
+            )
+        if party_type == "familia" and not family_list:
+            return (
+                jsonify(
+                    {"ok": False, "error": "Indica miembros de la familia"}
+                ),
+                400,
+            )
+        if bus and not bus_stop:
+            return (
+                jsonify({"ok": False, "error": "Selecciona una parada"}),
+                400,
+            )
+
+    if not bus:
+        bus_stop = ""
+    if bus:
+        private_transport = False
+
     payload = {
         "name": name,
         "attending": attending,
-        "address": address,
+        "party_type": party_type,
+        "partner_name": partner_name,
+        "family_members": family_members,
         "bus": bus,
+        "bus_stop": bus_stop,
+        "private_transport": private_transport,
         "allergies": allergies,
         "message": message,
         "created_at": created_at,
@@ -593,10 +679,34 @@ def create_rsvp():
     with db_connection() as conn:
         conn.execute(
             """
-            INSERT INTO rsvps (name, attending, address, bus, allergies, message, created_at)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO rsvps (
+                name,
+                attending,
+                party_type,
+                partner_name,
+                family_members,
+                bus,
+                bus_stop,
+                private_transport,
+                allergies,
+                message,
+                created_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
-            (name, int(attending), address, int(bus), allergies, message, created_at),
+            (
+                name,
+                int(attending),
+                party_type,
+                partner_name,
+                family_members,
+                int(bus),
+                bus_stop,
+                int(private_transport),
+                allergies,
+                message,
+                created_at,
+            ),
         )
         conn.commit()
 
@@ -632,7 +742,8 @@ def export_csv():
     with db_connection() as conn:
         rows = conn.execute(
             """
-            SELECT id, name, attending, address, bus, allergies, message, created_at
+            SELECT id, name, attending, party_type, partner_name, family_members,
+                   bus, bus_stop, private_transport, allergies, message, created_at
             FROM rsvps
             ORDER BY id DESC
             """
@@ -641,16 +752,38 @@ def export_csv():
     buffer = StringIO()
     writer = csv.writer(buffer)
     writer.writerow(
-        ["ID", "Nombre", "Asistira", "Direccion", "Autobus", "Alergias", "Mensaje", "Fecha"]
+        [
+            "ID",
+            "Nombre",
+            "Asistira",
+            "Tipo",
+            "Pareja",
+            "Familia",
+            "Autobus",
+            "Parada",
+            "Transporte privado",
+            "Alergias",
+            "Mensaje",
+            "Fecha",
+        ]
     )
     for row in rows:
+        party_label = {
+            "solo": "Solo",
+            "pareja": "Con pareja",
+            "familia": "En familia",
+        }.get(row["party_type"], row["party_type"] or "")
         writer.writerow(
             [
                 row["id"],
                 row["name"],
                 "Si" if row["attending"] else "No",
-                row["address"] or "",
+                party_label,
+                row["partner_name"] or "",
+                row["family_members"] or "",
                 "Si" if row["bus"] else "No",
+                row["bus_stop"] or "",
+                "Si" if row["private_transport"] else "No",
                 row["allergies"] or "",
                 row["message"] or "",
                 row["created_at"],

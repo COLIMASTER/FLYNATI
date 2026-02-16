@@ -7,6 +7,11 @@ const statNo = document.getElementById("stat-no");
 const statBus = document.getElementById("stat-bus");
 const lastUpdate = document.getElementById("last-update");
 const mischiefToggle = document.getElementById("mischief-toggle");
+const partyLabels = {
+  solo: "Solo",
+  pareja: "Con pareja",
+  familia: "En familia",
+};
 
 const updateMischiefToggle = (enabled) => {
   if (!mischiefToggle) {
@@ -62,14 +67,32 @@ const renderRows = (items) => {
 
     const attending = item.attending ? "Sí" : "No";
     const bus = item.bus ? "Sí" : "No";
+    const party = partyLabels[item.party_type] || "-";
+    const partner = item.partner_name || "-";
+    const family = item.family_members || "-";
+    const busStop = item.bus ? item.bus_stop || "-" : "-";
+    const privateTransportLabel = item.bus
+      ? "-"
+      : item.private_transport
+      ? "Sí"
+      : "No";
+    const privateTransportCell = item.bus
+      ? privateTransportLabel
+      : `<span class="status-pill ${
+          item.private_transport ? "status-yes" : "status-no"
+        }">${privateTransportLabel}</span>`;
 
     const createdAt = (item.created_at || "").replace(" UTC", "");
     row.innerHTML = `
       <td>${item.id}</td>
       <td>${item.name}</td>
+      <td>${party}</td>
+      <td>${partner}</td>
+      <td>${family}</td>
       <td><span class="status-pill ${item.attending ? "status-yes" : "status-no"}">${attending}</span></td>
-      <td>${item.address || "-"}</td>
       <td><span class="status-pill ${item.bus ? "status-yes" : "status-no"}">${bus}</span></td>
+      <td>${busStop}</td>
+      <td>${privateTransportCell}</td>
       <td>${item.allergies || "-"}</td>
       <td>${item.message || "-"}</td>
       <td>${createdAt}</td>
@@ -103,7 +126,10 @@ const updateStats = (items) => {
 
 const loadRsvps = async () => {
   try {
-    const response = await fetch(`/api/rsvps?key=${encodeURIComponent(key)}`);
+    const url = `/api/rsvps?key=${encodeURIComponent(key)}&ts=${Date.now()}`;
+    const response = await fetch(url, {
+      cache: "no-store",
+    });
     if (!response.ok) {
       throw new Error("No se pudo cargar el panel");
     }
