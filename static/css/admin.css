@@ -218,8 +218,8 @@ a {
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.admin-table th:nth-child(12),
-.admin-table td:nth-child(12) {
+.admin-table th:nth-child(11),
+.admin-table td:nth-child(11) {
   white-space: nowrap;
   min-width: 160px;
 }
@@ -294,6 +294,42 @@ a {
 .admin-foot {
   margin-top: 16px;
   color: var(--text-muted);
+}
+
+.admin-share {
+  margin-top: 24px;
+  width: fit-content;
+  max-width: 100%;
+  background: var(--panel);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 18px;
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.qr-wrap {
+  position: relative;
+  width: 130px;
+  height: 130px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: #fff;
+}
+
+.qr-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.qr-link {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-style: normal;
+  word-break: break-all;
 }
 
 .game-alert {

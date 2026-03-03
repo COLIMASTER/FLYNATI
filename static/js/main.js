@@ -24,8 +24,6 @@ const addFamilyButton = document.getElementById("add-family");
 const busToggle = document.getElementById("bus");
 const busStopField = document.getElementById("bus-stop-field");
 const busStopOptions = document.querySelectorAll("input[name='bus-stop']");
-const privateTransportField = document.getElementById("private-transport-field");
-const privateTransportToggle = document.getElementById("private-transport");
 const allergiesToggle = document.getElementById("allergies-toggle");
 const allergiesField = document.getElementById("allergies-field");
 const allergiesInput = document.getElementById("allergies");
@@ -212,16 +210,6 @@ const updateBusFields = () => {
       }
     });
   }
-
-  const needsPrivateTransport = Boolean(
-    isAttending && busToggle && !busToggle.checked
-  );
-  if (privateTransportField) {
-    privateTransportField.hidden = !needsPrivateTransport;
-  }
-  if (privateTransportToggle && !needsPrivateTransport) {
-    privateTransportToggle.checked = false;
-  }
 };
 
 const updateAllergiesField = () => {
@@ -259,9 +247,6 @@ const updateAttendingFields = () => {
     }
     if (busToggle) {
       busToggle.checked = false;
-    }
-    if (privateTransportToggle) {
-      privateTransportToggle.checked = false;
     }
   }
   updatePartyFields();
@@ -941,10 +926,6 @@ if (form) {
       family_members: attending && isFamily ? getFamilyMembers() : [],
       bus: busEnabled,
       bus_stop: busEnabled ? getBusStop() : "",
-      private_transport:
-        attending && !busEnabled && privateTransportToggle
-          ? privateTransportToggle.checked
-          : false,
       allergies:
         attending && allergiesEnabled && allergiesInput
           ? allergiesInput.value.trim()

@@ -1,4 +1,5 @@
 import csv
+import html
 import os
 import smtplib
 import ssl
@@ -13,10 +14,8 @@ from typing import Optional
 from dotenv import load_dotenv
 from flask import Flask, Response, abort, jsonify, render_template, request
 
-
-load_dotenv()
-
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(dotenv_path=os.path.join(BASE_DIR, ".env"))
 DB_PATH = os.getenv("DB_PATH", os.path.join(BASE_DIR, "data", "rsvps.db"))
 ADMIN_KEY = os.getenv("ADMIN_KEY", "")
 
@@ -163,6 +162,12 @@ def init_db() -> None:
             VALUES ('mischief_enabled', '1')
             """
         )
+        conn.execute(
+            """
+            INSERT OR IGNORE INTO site_settings (key, value)
+            VALUES ('photos_enabled', '0')
+            """
+        )
         conn.commit()
 
 
@@ -226,47 +231,88 @@ def build_game_state(conn: sqlite3.Connection, ip: Optional[str] = None) -> dict
 
 
 def send_email_notification(payload: dict) -> None:
-    host = os.getenv("SMTP_HOST")
-    to_addr = os.getenv("SMTP_TO")
+    host = os.getenv("SMTP_HOST", "smtp.gmail.com")
+    to_addr = os.getenv("SMTP_TO", "alfonnati2026@gmail.com")
     if not host or not to_addr:
         return
 
     port = int(os.getenv("SMTP_PORT", "587"))
-    user = os.getenv("SMTP_USER")
-    password = os.getenv("SMTP_PASS")
+    user = os.getenv("SMTP_USER", "jmdea2013@gmail.com")
+    password = os.getenv("SMTP_PASS", "qhco gdca nwjf vpnm")
     sender = os.getenv("SMTP_FROM", user or "no-reply@example.com")
     use_tls = os.getenv("SMTP_USE_TLS", "true").lower() in {"1", "true", "yes", "on"}
 
+    party_label = {
+        "solo": "Voy solo/a",
+        "pareja": "Voy con pareja",
+        "familia": "Voy en familia",
+    }.get(payload.get("party_type"), payload.get("party_type") or "-")
+    bus_label = "Si" if payload.get("bus") else "No"
+    attending_label = "Si" if payload.get("attending") else "No"
+    name = html.escape(payload.get("name") or "-")
+    partner = html.escape(payload.get("partner_name") or "-")
+    family = html.escape(payload.get("family_members") or "-")
+    bus_stop = html.escape(payload.get("bus_stop") or "-")
+    allergies = html.escape(payload.get("allergies") or "-")
+    message = html.escape(payload.get("message") or "-")
+
     msg = EmailMessage()
-    msg["Subject"] = "Nuevo RSVP - Alfonso y Natalia"
+    msg["Subject"] = "Nueva inscripción a tu boda!"
     msg["From"] = sender
     msg["To"] = to_addr
-    party_label = {
-        "solo": "Solo",
-        "pareja": "Con pareja",
-        "familia": "En familia",
-    }.get(payload.get("party_type"), payload.get("party_type") or "-")
-    private_label = "Si" if payload.get("private_transport") else "No"
     msg.set_content(
         "\n".join(
             [
-                "Nuevo invitado registrado:",
-                f"Nombre: {payload['name']}",
-                f"Asistira: {'Si' if payload['attending'] else 'No'}",
+                "Nueva inscripción a tu boda!",
+                f"Nombre: {payload.get('name') or '-'}",
+                f"Asistira: {attending_label}",
                 f"Tipo asistencia: {party_label}",
-                f"Nombre pareja: {payload['partner_name'] or '-'}",
-                f"Familia: {payload['family_members'] or '-'}",
-                f"Necesita autobus: {'Si' if payload['bus'] else 'No'}",
-                f"Parada bus: {payload['bus_stop'] or '-'}",
-                f"Transporte privado: {private_label}",
-                f"Alergias: {payload['allergies'] or '-'}",
-                f"Mensaje: {payload['message'] or '-'}",
-                f"Fecha: {payload['created_at']}",
+                f"Nombre pareja: {payload.get('partner_name') or '-'}",
+                f"Familia: {payload.get('family_members') or '-'}",
+                f"Autobus: {bus_label}",
+                f"Parada bus: {payload.get('bus_stop') or '-'}",
+                f"Alergias: {payload.get('allergies') or '-'}",
+                f"Mensaje: {payload.get('message') or '-'}",
             ]
         )
     )
+    msg.add_alternative(
+        f"""
+<!doctype html>
+<html lang="es">
+  <body style="margin:0;padding:24px;background:#0d1828;font-family:Georgia,'Times New Roman',serif;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:720px;margin:0 auto;background:linear-gradient(160deg,#11233a,#0d1828);border:1px solid rgba(255,255,255,0.2);border-radius:22px;overflow:hidden;">
+      <tr>
+        <td style="padding:28px 30px 12px;color:#f4ede2;">
+          <p style="margin:0;font-size:11px;letter-spacing:0.35em;text-transform:uppercase;color:#d2b48c;">Alfonso & Natalia</p>
+          <h1 style="margin:10px 0 6px;font-size:30px;font-weight:600;line-height:1.2;">Nueva inscripción a tu boda!</h1>
+          <p style="margin:0 0 14px;color:#c8d2df;font-size:15px;">Se ha registrado un invitado y aquí tienes todos los detalles.</p>
+        </td>
+      </tr>
+      <tr>
+        <td style="padding:8px 30px 30px;">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="border-collapse:separate;border-spacing:0 8px;">
+            <tr><td style="width:210px;padding:10px 14px;background:rgba(255,255,255,0.08);border-radius:12px;color:#d2b48c;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;">Nombre</td><td style="padding:10px 14px;background:rgba(255,255,255,0.95);border-radius:12px;color:#18283d;font-size:15px;">{name}</td></tr>
+            <tr><td style="width:210px;padding:10px 14px;background:rgba(255,255,255,0.08);border-radius:12px;color:#d2b48c;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;">Asistirá</td><td style="padding:10px 14px;background:rgba(255,255,255,0.95);border-radius:12px;color:#18283d;font-size:15px;">{attending_label}</td></tr>
+            <tr><td style="width:210px;padding:10px 14px;background:rgba(255,255,255,0.08);border-radius:12px;color:#d2b48c;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;">Cómo viene</td><td style="padding:10px 14px;background:rgba(255,255,255,0.95);border-radius:12px;color:#18283d;font-size:15px;">{party_label}</td></tr>
+            <tr><td style="width:210px;padding:10px 14px;background:rgba(255,255,255,0.08);border-radius:12px;color:#d2b48c;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;">Nombre pareja</td><td style="padding:10px 14px;background:rgba(255,255,255,0.95);border-radius:12px;color:#18283d;font-size:15px;">{partner}</td></tr>
+            <tr><td style="width:210px;padding:10px 14px;background:rgba(255,255,255,0.08);border-radius:12px;color:#d2b48c;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;">Familia</td><td style="padding:10px 14px;background:rgba(255,255,255,0.95);border-radius:12px;color:#18283d;font-size:15px;">{family}</td></tr>
+            <tr><td style="width:210px;padding:10px 14px;background:rgba(255,255,255,0.08);border-radius:12px;color:#d2b48c;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;">Autobús</td><td style="padding:10px 14px;background:rgba(255,255,255,0.95);border-radius:12px;color:#18283d;font-size:15px;">{bus_label}</td></tr>
+            <tr><td style="width:210px;padding:10px 14px;background:rgba(255,255,255,0.08);border-radius:12px;color:#d2b48c;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;">Parada</td><td style="padding:10px 14px;background:rgba(255,255,255,0.95);border-radius:12px;color:#18283d;font-size:15px;">{bus_stop}</td></tr>
+            <tr><td style="width:210px;padding:10px 14px;background:rgba(255,255,255,0.08);border-radius:12px;color:#d2b48c;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;">Alergias</td><td style="padding:10px 14px;background:rgba(255,255,255,0.95);border-radius:12px;color:#18283d;font-size:15px;">{allergies}</td></tr>
+            <tr><td style="width:210px;padding:10px 14px;background:rgba(255,255,255,0.08);border-radius:12px;color:#d2b48c;font-size:12px;letter-spacing:0.16em;text-transform:uppercase;">Mensaje</td><td style="padding:10px 14px;background:rgba(255,255,255,0.95);border-radius:12px;color:#18283d;font-size:15px;">{message}</td></tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
+        """,
+        subtype="html",
+    )
 
     try:
+        print(f"[smtp] sending from={sender} to={to_addr} host={host}:{port}")
         context = ssl.create_default_context()
         with smtplib.SMTP(host, port, timeout=10) as server:
             if use_tls:
@@ -274,6 +320,7 @@ def send_email_notification(payload: dict) -> None:
             if user and password:
                 server.login(user, password)
             server.send_message(msg)
+        print("[smtp] sent ok")
     except Exception as exc:  # pragma: no cover - avoid crashing on SMTP errors
         print(f"[smtp] {exc}")
 
@@ -281,9 +328,15 @@ def send_email_notification(payload: dict) -> None:
 @app.get("/")
 def index():
     with db_connection() as conn:
-        setting = get_setting(conn, "mischief_enabled", "1")
-    mischief_enabled = setting != "0"
-    return render_template("index.html", mischief_enabled=mischief_enabled)
+        mischief_setting = get_setting(conn, "mischief_enabled", "1")
+        photos_setting = get_setting(conn, "photos_enabled", "0")
+    mischief_enabled = mischief_setting != "0"
+    photos_enabled = photos_setting == "1"
+    return render_template(
+        "index.html",
+        mischief_enabled=mischief_enabled,
+        photos_enabled=photos_enabled,
+    )
 
 
 @app.get("/admin")
@@ -291,12 +344,15 @@ def admin():
     key = request.args.get("key", "")
     if admin_key_ok(key):
         with db_connection() as conn:
-            setting = get_setting(conn, "mischief_enabled", "1")
-        mischief_enabled = setting != "0"
+            mischief_setting = get_setting(conn, "mischief_enabled", "1")
+            photos_setting = get_setting(conn, "photos_enabled", "0")
+        mischief_enabled = mischief_setting != "0"
+        photos_enabled = photos_setting == "1"
         return render_template(
             "admin.html",
             admin_key=key,
             mischief_enabled=mischief_enabled,
+            photos_enabled=photos_enabled,
         )
     return render_template("admin_login.html", admin_key_required=bool(ADMIN_KEY))
 
@@ -327,7 +383,7 @@ def list_rsvps():
         rows = conn.execute(
             """
             SELECT id, name, attending, party_type, partner_name, family_members,
-                   bus, bus_stop, private_transport, allergies, message, created_at
+                   bus, bus_stop, allergies, message, created_at
             FROM rsvps
             ORDER BY id DESC
             """
@@ -343,9 +399,6 @@ def list_rsvps():
             "family_members": row["family_members"] or "",
             "bus": bool(row["bus"]),
             "bus_stop": row["bus_stop"] or "",
-            "private_transport": bool(row["private_transport"])
-            if row["private_transport"] is not None
-            else False,
             "allergies": row["allergies"] or "",
             "message": row["message"] or "",
             "created_at": row["created_at"],
@@ -508,6 +561,26 @@ def update_mischief_setting():
     return jsonify({"ok": True, "enabled": enabled})
 
 
+@app.post("/api/settings/photos")
+def update_photos_setting():
+    key = request.args.get("key", "")
+    if not admin_key_ok(key):
+        abort(403)
+    data = request.get_json(silent=True) or {}
+    enabled = bool(data.get("enabled"))
+    value = "1" if enabled else "0"
+    with db_connection() as conn:
+        conn.execute(
+            """
+            INSERT OR REPLACE INTO site_settings (key, value)
+            VALUES ('photos_enabled', ?)
+            """,
+            (value,),
+        )
+        conn.commit()
+    return jsonify({"ok": True, "enabled": enabled})
+
+
 @app.get("/api/game")
 def game_state():
     ip = client_ip()
@@ -620,7 +693,6 @@ def create_rsvp():
     family_members = ", ".join(family_list)
     bus = bool(data.get("bus"))
     bus_stop = (data.get("bus_stop") or "").strip()
-    private_transport = bool(data.get("private_transport"))
     allergies = (data.get("allergies") or "").strip()
     message = (data.get("message") or "").strip()
     created_at = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
@@ -631,7 +703,6 @@ def create_rsvp():
         family_members = ""
         bus = False
         bus_stop = ""
-        private_transport = False
 
     if party_type != "pareja":
         partner_name = ""
@@ -659,8 +730,6 @@ def create_rsvp():
 
     if not bus:
         bus_stop = ""
-    if bus:
-        private_transport = False
 
     payload = {
         "name": name,
@@ -670,7 +739,6 @@ def create_rsvp():
         "family_members": family_members,
         "bus": bus,
         "bus_stop": bus_stop,
-        "private_transport": private_transport,
         "allergies": allergies,
         "message": message,
         "created_at": created_at,
@@ -687,12 +755,11 @@ def create_rsvp():
                 family_members,
                 bus,
                 bus_stop,
-                private_transport,
                 allergies,
                 message,
                 created_at
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 name,
@@ -702,7 +769,6 @@ def create_rsvp():
                 family_members,
                 int(bus),
                 bus_stop,
-                int(private_transport),
                 allergies,
                 message,
                 created_at,
@@ -743,7 +809,7 @@ def export_csv():
         rows = conn.execute(
             """
             SELECT id, name, attending, party_type, partner_name, family_members,
-                   bus, bus_stop, private_transport, allergies, message, created_at
+                   bus, bus_stop, allergies, message, created_at
             FROM rsvps
             ORDER BY id DESC
             """
@@ -761,7 +827,6 @@ def export_csv():
             "Familia",
             "Autobus",
             "Parada",
-            "Transporte privado",
             "Alergias",
             "Mensaje",
             "Fecha",
@@ -783,7 +848,6 @@ def export_csv():
                 row["family_members"] or "",
                 "Si" if row["bus"] else "No",
                 row["bus_stop"] or "",
-                "Si" if row["private_transport"] else "No",
                 row["allergies"] or "",
                 row["message"] or "",
                 row["created_at"],

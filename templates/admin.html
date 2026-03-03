@@ -69,6 +69,23 @@
         </button>
       </section>
 
+      <section class="admin-toggle" aria-label="Control de fotos">
+        <div>
+          <p class="eyebrow">Fotos</p>
+          <h2>Mostrar sección de fotos</h2>
+          <p class="admin-text">Activa o desactiva la galería de recuerdos para invitados.</p>
+        </div>
+        <button
+          class="toggle-btn"
+          id="photos-toggle"
+          type="button"
+          data-enabled="{{ 'true' if photos_enabled else 'false' }}"
+          aria-pressed="{{ 'true' if photos_enabled else 'false' }}"
+        >
+          {{ "Encendido" if photos_enabled else "Apagado" }}
+        </button>
+      </section>
+
       <section class="admin-table">
         <table>
           <thead>
@@ -81,7 +98,6 @@
           <th>Asiste</th>
           <th>Autobús</th>
           <th>Parada</th>
-          <th>Transporte privado</th>
           <th>Alergias</th>
           <th>Mensaje</th>
           <th>Fecha</th>
@@ -90,6 +106,21 @@
       </thead>
           <tbody id="rsvp-body"></tbody>
         </table>
+      </section>
+
+      <section class="admin-share" aria-label="QR para compartir la web">
+        <p class="eyebrow">Compartir</p>
+        <div class="qr-wrap">
+          <img
+            class="qr-image"
+            src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&margin=8&data=https%3A%2F%2Fflynati.onrender.com"
+            alt="QR de la web de la boda"
+            loading="lazy"
+          />
+        </div>
+        <a class="qr-link" href="https://flynati.onrender.com" target="_blank" rel="noopener">
+          https://flynati.onrender.com
+        </a>
       </section>
 
       <p class="admin-foot">Última actualización: <span id="last-update">--</span></p>

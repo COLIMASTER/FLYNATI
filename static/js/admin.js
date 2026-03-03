@@ -7,10 +7,31 @@ const statNo = document.getElementById("stat-no");
 const statBus = document.getElementById("stat-bus");
 const lastUpdate = document.getElementById("last-update");
 const mischiefToggle = document.getElementById("mischief-toggle");
+const photosToggle = document.getElementById("photos-toggle");
 const partyLabels = {
   solo: "Solo",
   pareja: "Con pareja",
   familia: "En familia",
+};
+
+const formatMadridTime = (value) => {
+  let date;
+
+  if (value instanceof Date) {
+    date = new Date(value.getTime());
+  } else if (typeof value === "string" && value.trim()) {
+    const normalized = value.replace(" UTC", "Z").replace(" ", "T");
+    date = new Date(normalized);
+  }
+
+  if (!date || Number.isNaN(date.getTime())) {
+    return typeof value === "string" && value.trim() ? value.replace(" UTC", "") : "-";
+  }
+
+  return date.toLocaleString("es-ES", {
+    hour12: false,
+    timeZone: "Europe/Madrid",
+  });
 };
 
 const updateMischiefToggle = (enabled) => {
@@ -20,6 +41,15 @@ const updateMischiefToggle = (enabled) => {
   mischiefToggle.dataset.enabled = enabled ? "true" : "false";
   mischiefToggle.setAttribute("aria-pressed", enabled ? "true" : "false");
   mischiefToggle.textContent = enabled ? "Encendido" : "Apagado";
+};
+
+const updatePhotosToggle = (enabled) => {
+  if (!photosToggle) {
+    return;
+  }
+  photosToggle.dataset.enabled = enabled ? "true" : "false";
+  photosToggle.setAttribute("aria-pressed", enabled ? "true" : "false");
+  photosToggle.textContent = enabled ? "Encendido" : "Apagado";
 };
 
 const handleDelete = async (event) => {
@@ -71,18 +101,8 @@ const renderRows = (items) => {
     const partner = item.partner_name || "-";
     const family = item.family_members || "-";
     const busStop = item.bus ? item.bus_stop || "-" : "-";
-    const privateTransportLabel = item.bus
-      ? "-"
-      : item.private_transport
-      ? "Sí"
-      : "No";
-    const privateTransportCell = item.bus
-      ? privateTransportLabel
-      : `<span class="status-pill ${
-          item.private_transport ? "status-yes" : "status-no"
-        }">${privateTransportLabel}</span>`;
 
-    const createdAt = (item.created_at || "").replace(" UTC", "");
+    const createdAt = formatMadridTime(item.created_at || "");
     row.innerHTML = `
       <td>${item.id}</td>
       <td>${item.name}</td>
@@ -92,7 +112,6 @@ const renderRows = (items) => {
       <td><span class="status-pill ${item.attending ? "status-yes" : "status-no"}">${attending}</span></td>
       <td><span class="status-pill ${item.bus ? "status-yes" : "status-no"}">${bus}</span></td>
       <td>${busStop}</td>
-      <td>${privateTransportCell}</td>
       <td>${item.allergies || "-"}</td>
       <td>${item.message || "-"}</td>
       <td>${createdAt}</td>
@@ -138,7 +157,7 @@ const loadRsvps = async () => {
     renderRows(items);
     updateStats(items);
     if (lastUpdate) {
-      lastUpdate.textContent = new Date().toLocaleString();
+      lastUpdate.textContent = formatMadridTime(new Date());
     }
   } catch (error) {
     if (lastUpdate) {
@@ -181,6 +200,36 @@ if (mischiefToggle) {
       }
     } finally {
       mischiefToggle.disabled = false;
+    }
+  });
+}
+
+if (photosToggle) {
+  updatePhotosToggle(photosToggle.dataset.enabled === "true");
+  photosToggle.addEventListener("click", async () => {
+    const nextEnabled = photosToggle.dataset.enabled !== "true";
+    photosToggle.disabled = true;
+    try {
+      const response = await fetch(
+        `/api/settings/photos?key=${encodeURIComponent(key)}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ enabled: nextEnabled }),
+        }
+      );
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || "No se pudo actualizar");
+      }
+      const data = await response.json().catch(() => ({}));
+      updatePhotosToggle(Boolean(data.enabled));
+    } catch (error) {
+      if (lastUpdate) {
+        lastUpdate.textContent = error.message;
+      }
+    } finally {
+      photosToggle.disabled = false;
     }
   });
 }

@@ -21,22 +21,17 @@
         <div class="envelope-liner"></div>
         <div class="paper">
           <div class="paper-inner">
-            <p class="paper-kicker">Invitación boda</p>
-            <h1 class="paper-title">Alfonso y Natalia</h1>
+            <h1 class="paper-title">¡Nos casamos!</h1>
           </div>
         </div>
         <div class="side-flap left"></div>
         <div class="side-flap right"></div>
         <div class="bottom-flap"></div>
         <div class="address">
-          <span class="address-line">Invitación exclusiva</span>
           <span class="address-line">Sevilla 2026</span>
         </div>
         <div class="postage">
-          <span class="postage-kicker">Sello postal</span>
-          <span class="postage-name">Alfonso</span>
-          <span class="postage-name">Natalia</span>
-          <span class="postage-mark">02-05-26</span>
+          <span class="postage-city">Sevilla 2026</span>
         </div>
         <div class="flap"></div>
         <button class="seal" type="button" aria-label="Abrir invitación">
@@ -48,14 +43,16 @@
 
     <audio
       id="intro-audio"
-      src="{{ url_for('static', filename='mp3/Coldplay - Viva La Vida (Official Video).mp3') }}"
+      src="{{ url_for('static', filename='mp3/Sebastian Maschat & Erlend Øye - Price - Barzán Bazaar.mp3') }}"
       preload="auto"
     ></audio>
 
     <nav class="site-nav" aria-label="Navegación principal">
-      <a href="#ubicacion">Ubicación</a>
+      <a href="#ubicacion">Detalles y ubicación</a>
       <a href="#dj">Canciones</a>
+      {% if photos_enabled %}
       <a href="#galeria">Recuerdos</a>
+      {% endif %}
     </nav>
 
     <main class="site" id="top">
@@ -63,7 +60,6 @@
         <div class="hero-bg" aria-hidden="true"></div>
         <div class="hero-overlay" aria-hidden="true"></div>
         <div class="hero-content">
-          <p class="hero-top reveal">Boda de Alfonso y Natalia</p>
           <h1 class="hero-title reveal">Un sí para toda la vida</h1>
           <p class="hero-date reveal">Sábado 02 mayo 2026</p>
           <div class="hero-actions reveal">
@@ -126,7 +122,7 @@
             </div>
           </div>
           <div class="split-text reveal">
-            <p class="eyebrow">Ubicación</p>
+            <p class="eyebrow">Detalles y ubicación</p>
             <h2>Hacienda Los Miradores</h2>
             <p>Hacienda Los Miradores, Mairena del Alcor, Sevilla.</p>
             <p>Queremos que bebáis, riáis y bailéis sin preocupaciones.</p>
@@ -153,39 +149,25 @@
                 <p class="label">Horario</p>
                 <p>13,00 h</p>
               </div>
+              <div class="dresscode-block">
+                <p class="label">Dress code</p>
+                <div class="dresscode-grid">
+                  <div class="dresscode-item">
+                    <span class="dresscode-role">Hombre</span>
+                    <span class="dresscode-value">Traje de chaqueta</span>
+                  </div>
+                  <div class="dresscode-item">
+                    <span class="dresscode-role">Mujer</span>
+                    <span class="dresscode-value">Vestido tipo cóctel</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section class="section details" id="detalles" style="--layer: 4">
-        <div class="section-inner">
-          <div class="section-head reveal">
-            <p class="eyebrow">Detalles del día</p>
-            <h2>Ceremonia, brindis y fiesta sin límites</h2>
-          </div>
-          <div class="detail-grid">
-            <article class="detail-card reveal">
-              <h3>Ceremonia</h3>
-              <p>18:00 - Jardín principal</p>
-              <p>Una entrada majestuosa con cuerdas y velas.</p>
-            </article>
-            <article class="detail-card reveal">
-              <h3>Cóctel</h3>
-              <p>19:30 - Galería dorada</p>
-              <p>Gastronomía de autor y coctelería premium.</p>
-            </article>
-            <article class="detail-card reveal">
-              <h3>Fiesta</h3>
-              <p>21:30 - Salón de cristal</p>
-              <p>DJ, live sax y pista iluminada.</p>
-            </article>
-          </div>
-        </div>
-        <div class="detail-ribbon"></div>
-      </section>
-
-      <section class="section gallery" id="galeria" style="--layer: 6">
+      <section class="section gallery" id="galeria" style="--layer: 6" {% if not photos_enabled %}hidden{% endif %}>
         <div class="section-inner">
           <div class="section-head reveal">
             <p class="eyebrow">Fotos</p>
@@ -413,22 +395,6 @@
                   <label class="choice">
                     <input type="radio" name="bus-stop" value="Santa Justa (recogida a las 12,15)" />
                     <span>Santa Justa <span class="choice-meta">(recogida a las 12,15)</span></span>
-                  </label>
-                </div>
-              </div>
-              <div class="field switches" id="private-transport-field" hidden>
-                <div class="switch-row">
-                  <div>
-                    <p class="switch-label">¿Necesitarás transporte privado?</p>
-                    <p class="switch-hint">
-                      Tendremos varios taxis disponibles para ir o volver de la Hacienda.
-                      En caso de estar interesado, marca esta opción y te contaremos más detalles y los
-                      precios que nos han hecho.
-                    </p>
-                  </div>
-                  <label class="switch">
-                    <input id="private-transport" type="checkbox" />
-                    <span class="slider"></span>
                   </label>
                 </div>
               </div>
