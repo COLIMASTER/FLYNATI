@@ -928,7 +928,7 @@ main {
 .hero-bg {
   position: absolute;
   inset: 0;
-  background-image: url("../imagenes/portada.png");
+  background-image: url("../imagenes/portada2.jpeg");
   background-size: cover;
   background-position: center;
   transform: translateY(0) scale(1.05);
@@ -1895,7 +1895,7 @@ main {
 .venue-bg {
   position: absolute;
   inset: 0;
-  background-image: url("hacienda.jpeg");
+  background-image: url("../imagenes/maps.jpeg");
   background-size: cover;
   background-position: center;
   transform: translateY(0) scale(1.05);
