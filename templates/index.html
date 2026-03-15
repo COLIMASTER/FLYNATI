@@ -363,8 +363,10 @@
               <div class="field switches">
                 <div class="switch-row">
                   <div>
-                    <p class="switch-label">Usarías el autobús ida y vuelta</p>
-                    <p class="switch-hint">Si lo necesitas, elige una parada.</p>
+                    <p class="switch-label">Usarías el autobús</p>
+                    <p class="switch-hint switch-hint--bus">
+                      La vuelta saldrá de la Hacienda a las 23:30 y hará las mismas paradas que la ida.
+                    </p>
                   </div>
                   <label class="switch">
                     <input id="bus" type="checkbox" />
@@ -373,23 +375,23 @@
                 </div>
               </div>
               <div class="field" id="bus-stop-field" hidden>
-                <label>Elige tu parada</label>
+                <label>Elige tu parada de ida</label>
                 <div class="choice-group" role="radiogroup" aria-label="Parada de autobús">
                   <label class="choice">
-                    <input type="radio" name="bus-stop" value="Coria del Rio (recogida a las 11,15)" />
-                    <span>Coria del Rio <span class="choice-meta">(recogida a las 11,15)</span></span>
+                    <input type="radio" name="bus-stop" value="Coria del Rio (recogida a las 11:30)" />
+                    <span>Coria del Rio <span class="choice-meta">(recogida a las 11:30)</span></span>
                   </label>
                   <label class="choice">
-                    <input type="radio" name="bus-stop" value="Metro Blas Infante (recogida a las 11,45)" />
-                    <span>Metro Blas Infante <span class="choice-meta">(recogida a las 11,45)</span></span>
+                    <input type="radio" name="bus-stop" value="Metro Blas Infante (recogida a las 11:45)" />
+                    <span>Metro Blas Infante <span class="choice-meta">(recogida a las 11:45)</span></span>
                   </label>
                   <label class="choice">
-                    <input type="radio" name="bus-stop" value="Hotel Al-Andalus Palace (recogida a las 12,15)" />
-                    <span>Hotel Al-Andalus Palace <span class="choice-meta">(recogida a las 12,15)</span></span>
+                    <input type="radio" name="bus-stop" value="Hotel Al Andalus (recogida a las 12:00)" />
+                    <span>Hotel Al Andalus <span class="choice-meta">(recogida a las 12:00)</span></span>
                   </label>
                   <label class="choice">
-                    <input type="radio" name="bus-stop" value="Santa Justa (recogida a las 12,15)" />
-                    <span>Santa Justa <span class="choice-meta">(recogida a las 12,15)</span></span>
+                    <input type="radio" name="bus-stop" value="Santa Justa (recogida a las 12:00)" />
+                    <span>Santa Justa <span class="choice-meta">(recogida a las 12:00)</span></span>
                   </label>
                 </div>
               </div>
