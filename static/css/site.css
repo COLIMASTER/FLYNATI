@@ -2310,6 +2310,18 @@ main {
   color: var(--ink-soft);
 }
 
+.switch-hint--bus {
+  margin-top: 6px;
+  font-size: 0.94rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: #3f3024;
+  background: rgba(200, 164, 112, 0.2);
+  border: 1px solid rgba(200, 164, 112, 0.35);
+  border-radius: 10px;
+  padding: 8px 10px;
+}
+
 .switch {
   position: relative;
   display: inline-block;
