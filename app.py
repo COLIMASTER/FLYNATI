@@ -6,6 +6,7 @@ import ssl
 import sqlite3
 import unicodedata
 import uuid
+from contextlib import contextmanager
 from datetime import datetime, timezone
 from email.message import EmailMessage
 from io import StringIO
@@ -14,10 +15,24 @@ from typing import Optional
 from dotenv import load_dotenv
 from flask import Flask, Response, abort, jsonify, render_template, request
 
+try:
+    import psycopg
+    from psycopg.rows import dict_row
+except ImportError:  # pragma: no cover - optional dependency in local sqlite mode
+    psycopg = None
+    dict_row = None
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 load_dotenv(dotenv_path=os.path.join(BASE_DIR, ".env"))
 DB_PATH = os.getenv("DB_PATH", os.path.join(BASE_DIR, "data", "rsvps.db"))
+DATABASE_URL = os.getenv("DATABASE_URL", "").strip()
+USE_POSTGRES = bool(DATABASE_URL)
 ADMIN_KEY = os.getenv("ADMIN_KEY", "")
+
+if USE_POSTGRES and psycopg is None:
+    raise RuntimeError(
+        "DATABASE_URL está definido pero falta psycopg. Añade psycopg[binary] a requirements.txt."
+    )
 
 app = Flask(__name__, static_url_path="/static")
 
@@ -35,6 +50,27 @@ GAME_INSTRUCTION = (
 )
 ALLOW_MULTIPLE_GAME_VOTES = True
 
+DBIntegrityError = psycopg.IntegrityError if USE_POSTGRES else sqlite3.IntegrityError
+
+
+class DBConnection:
+    def __init__(self, raw_conn, use_postgres: bool):
+        self.raw_conn = raw_conn
+        self.use_postgres = use_postgres
+
+    def execute(self, query: str, params=()):
+        if params is None:
+            params = ()
+        if self.use_postgres:
+            query = query.replace("?", "%s")
+        return self.raw_conn.execute(query, params)
+
+    def commit(self):
+        self.raw_conn.commit()
+
+    def rollback(self):
+        self.raw_conn.rollback()
+
 
 def normalize_text(value: str) -> str:
     normalized = unicodedata.normalize("NFD", value)
@@ -51,11 +87,141 @@ def client_ip() -> str:
     return request.remote_addr or "unknown"
 
 
-def init_db() -> None:
+def ensure_setting(conn: DBConnection, key: str, value: str) -> None:
+    if USE_POSTGRES:
+        conn.execute(
+            """
+            INSERT INTO site_settings (key, value)
+            VALUES (?, ?)
+            ON CONFLICT (key) DO NOTHING
+            """,
+            (key, value),
+        )
+        return
+    conn.execute(
+        """
+        INSERT OR IGNORE INTO site_settings (key, value)
+        VALUES (?, ?)
+        """,
+        (key, value),
+    )
+
+
+def set_setting(conn: DBConnection, key: str, value: str) -> None:
+    if USE_POSTGRES:
+        conn.execute(
+            """
+            INSERT INTO site_settings (key, value)
+            VALUES (?, ?)
+            ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value
+            """,
+            (key, value),
+        )
+        return
+    conn.execute(
+        """
+        INSERT OR REPLACE INTO site_settings (key, value)
+        VALUES (?, ?)
+        """,
+        (key, value),
+    )
+
+
+def init_db_postgres() -> None:
+    with db_connection() as conn:
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS rsvps (
+                id BIGSERIAL PRIMARY KEY,
+                name TEXT NOT NULL,
+                attending INTEGER NOT NULL,
+                party_type TEXT,
+                partner_name TEXT,
+                family_members TEXT,
+                address TEXT,
+                bus INTEGER NOT NULL,
+                bus_stop TEXT,
+                private_transport INTEGER,
+                allergies TEXT,
+                song TEXT,
+                message TEXT,
+                created_at TEXT NOT NULL
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS songs (
+                id BIGSERIAL PRIMARY KEY,
+                title TEXT NOT NULL,
+                votes INTEGER NOT NULL DEFAULT 0,
+                created_at TEXT NOT NULL
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS song_votes (
+                id BIGSERIAL PRIMARY KEY,
+                song_id BIGINT NOT NULL,
+                ip TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                UNIQUE(ip)
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS site_settings (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS game_state (
+                id INTEGER PRIMARY KEY,
+                challenge_index INTEGER NOT NULL,
+                round_index INTEGER NOT NULL,
+                updated_at TEXT NOT NULL,
+                CHECK (id = 1)
+            )
+            """
+        )
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS game_votes (
+                id BIGSERIAL PRIMARY KEY,
+                round_index INTEGER NOT NULL,
+                ip TEXT NOT NULL,
+                created_at TEXT NOT NULL,
+                UNIQUE(round_index, ip)
+            )
+            """
+        )
+        state = conn.execute("SELECT id FROM game_state WHERE id = 1").fetchone()
+        if not state:
+            created_at = datetime.now(timezone.utc).strftime(
+                "%Y-%m-%d %H:%M:%S UTC"
+            )
+            conn.execute(
+                """
+                INSERT INTO game_state (id, challenge_index, round_index, updated_at)
+                VALUES (1, 0, 1, ?)
+                """,
+                (created_at,),
+            )
+        ensure_setting(conn, "mischief_enabled", "1")
+        ensure_setting(conn, "photos_enabled", "0")
+        conn.commit()
+
+
+def init_db_sqlite() -> None:
     db_dir = os.path.dirname(DB_PATH)
     if db_dir:
         os.makedirs(db_dir, exist_ok=True)
-    with sqlite3.connect(DB_PATH) as conn:
+    with db_connection() as conn:
         conn.execute(
             """
             CREATE TABLE IF NOT EXISTS rsvps (
@@ -127,7 +293,8 @@ def init_db() -> None:
             """
         )
         columns = {
-            row[1] for row in conn.execute("PRAGMA table_info(rsvps)").fetchall()
+            row["name"]
+            for row in conn.execute("PRAGMA table_info(rsvps)").fetchall()
         }
         missing = {
             "party_type": "TEXT",
@@ -156,28 +323,33 @@ def init_db() -> None:
                 """,
                 (created_at,),
             )
-        conn.execute(
-            """
-            INSERT OR IGNORE INTO site_settings (key, value)
-            VALUES ('mischief_enabled', '1')
-            """
-        )
-        conn.execute(
-            """
-            INSERT OR IGNORE INTO site_settings (key, value)
-            VALUES ('photos_enabled', '0')
-            """
-        )
+        ensure_setting(conn, "mischief_enabled", "1")
+        ensure_setting(conn, "photos_enabled", "0")
         conn.commit()
 
 
-def db_connection() -> sqlite3.Connection:
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
+def init_db() -> None:
+    if USE_POSTGRES:
+        init_db_postgres()
+        return
+    init_db_sqlite()
 
 
-def get_setting(conn: sqlite3.Connection, key: str, default: str = "") -> str:
+@contextmanager
+def db_connection():
+    if USE_POSTGRES:
+        raw_conn = psycopg.connect(DATABASE_URL, row_factory=dict_row)
+    else:
+        raw_conn = sqlite3.connect(DB_PATH)
+        raw_conn.row_factory = sqlite3.Row
+    conn = DBConnection(raw_conn, USE_POSTGRES)
+    try:
+        yield conn
+    finally:
+        raw_conn.close()
+
+
+def get_setting(conn: DBConnection, key: str, default: str = "") -> str:
     row = conn.execute(
         "SELECT value FROM site_settings WHERE key = ?",
         (key,),
@@ -191,7 +363,7 @@ def admin_key_ok(key: str) -> bool:
     return bool(ADMIN_KEY) and key == ADMIN_KEY
 
 
-def build_game_state(conn: sqlite3.Connection, ip: Optional[str] = None) -> dict:
+def build_game_state(conn: DBConnection, ip: Optional[str] = None) -> dict:
     row = conn.execute(
         "SELECT challenge_index, round_index FROM game_state WHERE id = 1"
     ).fetchone()
@@ -201,10 +373,10 @@ def build_game_state(conn: sqlite3.Connection, ip: Optional[str] = None) -> dict
     challenge_index = int(row["challenge_index"])
     round_index = int(row["round_index"])
     count_row = conn.execute(
-        "SELECT COUNT(*) FROM game_votes WHERE round_index = ?",
+        "SELECT COUNT(*) AS vote_count FROM game_votes WHERE round_index = ?",
         (round_index,),
     ).fetchone()
-    count = int(count_row[0]) if count_row else 0
+    count = int(count_row["vote_count"]) if count_row else 0
     remaining = max(0, GAME_THRESHOLD - count)
     challenge = GAME_CHALLENGES[challenge_index % len(GAME_CHALLENGES)]
     challenge_active = count >= GAME_THRESHOLD
@@ -469,27 +641,45 @@ def create_song():
                         """,
                         (existing["id"], ip, created_at),
                     )
-                except sqlite3.IntegrityError:
+                except DBIntegrityError:
                     return jsonify({"ok": False, "error": "Ya has votado"}), 400
                 conn.commit()
                 return jsonify({"ok": True})
 
-        cursor = conn.execute(
-            """
-            INSERT INTO songs (title, votes, created_at)
-            VALUES (?, ?, ?)
-            """,
-            (title, 1, created_at),
-        )
+        song_id = None
+        if USE_POSTGRES:
+            created = conn.execute(
+                """
+                INSERT INTO songs (title, votes, created_at)
+                VALUES (?, ?, ?)
+                RETURNING id
+                """,
+                (title, 1, created_at),
+            ).fetchone()
+            if created:
+                song_id = created["id"]
+        else:
+            cursor = conn.execute(
+                """
+                INSERT INTO songs (title, votes, created_at)
+                VALUES (?, ?, ?)
+                """,
+                (title, 1, created_at),
+            )
+            song_id = cursor.lastrowid
+
+        if not song_id:
+            return jsonify({"ok": False, "error": "No se pudo guardar la canción"}), 500
+
         try:
             conn.execute(
                 """
                 INSERT INTO song_votes (song_id, ip, created_at)
                 VALUES (?, ?, ?)
                 """,
-                (cursor.lastrowid, ip, created_at),
+                (song_id, ip, created_at),
             )
-        except sqlite3.IntegrityError:
+        except DBIntegrityError:
             return jsonify({"ok": False, "error": "Ya has votado"}), 400
         conn.commit()
 
@@ -534,7 +724,7 @@ def vote_song():
                     datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC"),
                 ),
             )
-        except sqlite3.IntegrityError:
+        except DBIntegrityError:
             return jsonify({"ok": False, "error": "Ya has votado"}), 400
         conn.commit()
 
@@ -550,13 +740,7 @@ def update_mischief_setting():
     enabled = bool(data.get("enabled"))
     value = "1" if enabled else "0"
     with db_connection() as conn:
-        conn.execute(
-            """
-            INSERT OR REPLACE INTO site_settings (key, value)
-            VALUES ('mischief_enabled', ?)
-            """,
-            (value,),
-        )
+        set_setting(conn, "mischief_enabled", value)
         conn.commit()
     return jsonify({"ok": True, "enabled": enabled})
 
@@ -570,13 +754,7 @@ def update_photos_setting():
     enabled = bool(data.get("enabled"))
     value = "1" if enabled else "0"
     with db_connection() as conn:
-        conn.execute(
-            """
-            INSERT OR REPLACE INTO site_settings (key, value)
-            VALUES ('photos_enabled', ?)
-            """,
-            (value,),
-        )
+        set_setting(conn, "photos_enabled", value)
         conn.commit()
     return jsonify({"ok": True, "enabled": enabled})
 
@@ -611,7 +789,7 @@ def vote_game():
                 (state["round_index"], stored_ip, created_at),
             )
             conn.commit()
-        except sqlite3.IntegrityError:
+        except DBIntegrityError:
             return jsonify({"ok": False, "error": "Ya has pulsado"}), 400
         state = build_game_state(conn, ip=ip)
     return jsonify({"ok": True, "state": state})
