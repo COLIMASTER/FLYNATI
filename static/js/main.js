@@ -27,6 +27,7 @@ const busStopOptions = document.querySelectorAll("input[name='bus-stop']");
 const allergiesToggle = document.getElementById("allergies-toggle");
 const allergiesField = document.getElementById("allergies-field");
 const allergiesInput = document.getElementById("allergies");
+const copyIbanButton = document.getElementById("copy-iban-btn");
 const thankyouOverlay = document.getElementById("thankyou-overlay");
 const galleryScroll = document.querySelector(".gallery-scroll");
 const galleryTrack = document.getElementById("gallery-track");
@@ -51,6 +52,7 @@ let previousSongRanks = new Map();
 let songRefreshTimer = null;
 let songsCache = [];
 let gameRefreshTimer = null;
+let copyIbanTimer = null;
 
 const openIntro = () => {
   if (!intro || intro.classList.contains("opened")) {
@@ -432,6 +434,57 @@ const setupCountdown = () => {
 };
 
 setupCountdown();
+
+const fallbackCopy = (value) => {
+  const textarea = document.createElement("textarea");
+  textarea.value = value;
+  textarea.setAttribute("readonly", "");
+  textarea.style.position = "fixed";
+  textarea.style.opacity = "0";
+  textarea.style.pointerEvents = "none";
+  document.body.appendChild(textarea);
+  textarea.select();
+  textarea.setSelectionRange(0, textarea.value.length);
+  const copied = document.execCommand("copy");
+  textarea.remove();
+  return copied;
+};
+
+const copyText = async (value) => {
+  if (!value) {
+    return false;
+  }
+  if (navigator.clipboard && window.isSecureContext) {
+    try {
+      await navigator.clipboard.writeText(value);
+      return true;
+    } catch (error) {
+      return fallbackCopy(value);
+    }
+  }
+  return fallbackCopy(value);
+};
+
+if (copyIbanButton) {
+  copyIbanButton.addEventListener("click", async () => {
+    const iban = copyIbanButton.dataset.iban || "";
+    const copied = await copyText(iban);
+
+    if (copyIbanTimer) {
+      window.clearTimeout(copyIbanTimer);
+    }
+
+    if (copied) {
+      copyIbanButton.textContent = "Copiado";
+      copyIbanButton.classList.add("is-copied");
+    }
+
+    copyIbanTimer = window.setTimeout(() => {
+      copyIbanButton.textContent = "Copiar IBAN";
+      copyIbanButton.classList.remove("is-copied");
+    }, 2200);
+  });
+}
 
 const openGalleryLightbox = (src, alt) => {
   if (!galleryLightbox || !galleryLightboxImage) {

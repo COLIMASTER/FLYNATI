@@ -2390,6 +2390,171 @@ main {
   animation: glowPulse 10s ease-in-out infinite;
 }
 
+/* Gift account */
+
+.gift {
+  background: linear-gradient(160deg, #e9d8bc 0%, #f4ead9 46%, #d9c3a4 100%);
+  color: #2f2418;
+  min-height: 0;
+}
+
+.gift::after {
+  background:
+    radial-gradient(circle at 12% 18%, rgba(255, 255, 255, 0.52), transparent 42%),
+    radial-gradient(circle at 88% 84%, rgba(88, 114, 86, 0.2), transparent 46%),
+    linear-gradient(140deg, rgba(200, 164, 112, 0.25), transparent 52%);
+}
+
+.gift-bg,
+.gift-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.gift-bg {
+  background:
+    radial-gradient(circle at 14% 24%, rgba(255, 255, 255, 0.34), transparent 44%),
+    radial-gradient(circle at 82% 16%, rgba(88, 114, 86, 0.2), transparent 48%),
+    linear-gradient(120deg, rgba(255, 255, 255, 0.2), transparent 62%);
+  z-index: 0;
+}
+
+.gift-overlay {
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.22)),
+    radial-gradient(circle at 50% 95%, rgba(200, 164, 112, 0.28), transparent 58%);
+  z-index: 1;
+}
+
+.gift .section-inner {
+  position: relative;
+  z-index: 2;
+}
+
+.gift-card {
+  max-width: 840px;
+  margin: 0 auto;
+  padding: clamp(30px, 4vw, 48px);
+  border-radius: 30px;
+  background:
+    linear-gradient(160deg, rgba(255, 255, 255, 0.9), rgba(248, 241, 230, 0.88)),
+    repeating-linear-gradient(
+      90deg,
+      rgba(205, 178, 138, 0.1) 0 1px,
+      transparent 1px 18px
+    );
+  border: 1px solid rgba(142, 104, 62, 0.35);
+  box-shadow:
+    0 30px 70px rgba(84, 59, 34, 0.22),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.55);
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.gift-card::before {
+  content: "A + N";
+  position: absolute;
+  inset: auto -18px -40px auto;
+  font-family: var(--font-script);
+  font-style: normal;
+  font-size: clamp(3.2rem, 9vw, 6.6rem);
+  color: rgba(56, 43, 30, 0.14);
+  pointer-events: none;
+  transform: rotate(-8deg);
+}
+
+.gift-card h2 {
+  font-size: clamp(1.7rem, 4vw, 2.6rem);
+  max-width: 20ch;
+  margin-inline: auto;
+  color: #3a2c1d;
+}
+
+.gift-lead {
+  margin-top: 8px;
+  font-size: clamp(1rem, 2.4vw, 1.26rem);
+  color: #5b432a;
+  letter-spacing: 0.03em;
+}
+
+.gift-thanks {
+  margin-top: 22px;
+  font-family: var(--font-script);
+  font-size: clamp(1.8rem, 3.4vw, 2.4rem);
+  color: #88613b;
+}
+
+.gift-names {
+  margin-top: 8px;
+  font-size: 0.95rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #433321;
+  line-height: 1.75;
+  font-style: normal;
+}
+
+.gift-iban-wrap {
+  margin-top: 24px;
+  border-radius: 20px;
+  background: rgba(46, 35, 25, 0.08);
+  border: 1px solid rgba(76, 56, 38, 0.24);
+  padding: 18px 16px;
+}
+
+.gift-iban-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(62, 48, 35, 0.76);
+}
+
+.gift-iban {
+  margin-top: 10px;
+  font-family: "IBM Plex Mono", "Fira Code", ui-monospace, monospace;
+  font-size: clamp(0.88rem, 2.3vw, 1.15rem);
+  letter-spacing: 0.14em;
+  color: #34271b;
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.gift-actions {
+  margin-top: 22px;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+}
+
+.gift-copy-btn {
+  min-width: min(100%, 260px);
+  padding-inline: 28px;
+}
+
+.gift-copy-btn.is-copied {
+  background: linear-gradient(135deg, #6c8766, #8cab7f);
+  border-color: rgba(38, 74, 38, 0.5);
+  color: #f4fff1;
+}
+
+@media (max-width: 640px) {
+  .gift-card {
+    border-radius: 24px;
+    padding: 26px 18px;
+  }
+
+  .gift-names {
+    letter-spacing: 0.08em;
+  }
+
+  .gift-iban {
+    letter-spacing: 0.08em;
+    font-size: 0.86rem;
+  }
+}
+
 /* Thank you overlay */
 
 .thankyou-overlay {
