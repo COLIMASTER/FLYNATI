@@ -2465,18 +2465,48 @@ main {
   transform: rotate(-8deg);
 }
 
-.gift-card h2 {
+.gift-phrase {
+  position: relative;
   font-size: clamp(1.7rem, 4vw, 2.6rem);
-  max-width: 20ch;
+  line-height: 1.3;
+  max-width: 31ch;
   margin-inline: auto;
+  padding: 14px 22px;
+  border-radius: 16px;
   color: #3a2c1d;
+  text-shadow: 0 7px 16px rgba(84, 59, 34, 0.12);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.18)),
+    radial-gradient(circle at 50% 0, rgba(200, 164, 112, 0.2), transparent 60%);
+  border-top: 1px solid rgba(142, 104, 62, 0.35);
+  border-bottom: 1px solid rgba(142, 104, 62, 0.35);
 }
 
-.gift-lead {
-  margin-top: 8px;
-  font-size: clamp(1rem, 2.4vw, 1.26rem);
-  color: #5b432a;
-  letter-spacing: 0.03em;
+.gift-phrase-part {
+  display: block;
+}
+
+.gift-phrase-part + .gift-phrase-part {
+  margin-top: 0.18em;
+}
+
+.gift-phrase::before,
+.gift-phrase::after {
+  content: "✦";
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.82rem;
+  letter-spacing: 0.2em;
+  color: rgba(122, 88, 52, 0.7);
+}
+
+.gift-phrase::before {
+  top: -12px;
+}
+
+.gift-phrase::after {
+  bottom: -12px;
 }
 
 .gift-thanks {
@@ -2543,6 +2573,11 @@ main {
   .gift-card {
     border-radius: 24px;
     padding: 26px 18px;
+  }
+
+  .gift-phrase {
+    padding: 12px 12px;
+    max-width: 100%;
   }
 
   .gift-names {
