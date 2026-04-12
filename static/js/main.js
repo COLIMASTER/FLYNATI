@@ -39,10 +39,12 @@ const songInput = document.getElementById("song-title");
 const songSuggestions = document.getElementById("song-suggestions");
 const songList = document.getElementById("song-list");
 const songTabs = document.querySelectorAll("[data-song-view]");
+const songHint = document.querySelector(".dj-hint");
 const mischiefButton = document.getElementById("mala-button");
 const mischiefHint = document.getElementById("mala-hint");
 const mischiefNote = document.getElementById("mala-note");
 const mischiefDefaultHint = mischiefHint ? mischiefHint.textContent : "";
+const songHintDefault = songHint ? songHint.textContent : "";
 let introOpened = false;
 let audioEnabled = true;
 let thankyouTimer = null;
@@ -51,6 +53,9 @@ let songView = "top";
 let previousSongRanks = new Map();
 let songRefreshTimer = null;
 let songsCache = [];
+let songsRequestCounter = 0;
+let songsLastApplied = 0;
+let songHintTimer = null;
 let gameRefreshTimer = null;
 let copyIbanTimer = null;
 
@@ -703,6 +708,29 @@ const setSongView = (view) => {
   });
 };
 
+const showSongHint = (message, isError = false, duration = 2600) => {
+  if (!songHint) {
+    return;
+  }
+  if (songHintTimer) {
+    window.clearTimeout(songHintTimer);
+  }
+
+  if (!message) {
+    songHint.textContent = songHintDefault;
+    songHint.classList.remove("is-error", "is-success");
+    return;
+  }
+
+  songHint.textContent = message;
+  songHint.classList.toggle("is-error", Boolean(isError));
+  songHint.classList.toggle("is-success", !isError);
+  songHintTimer = window.setTimeout(() => {
+    songHint.textContent = songHintDefault;
+    songHint.classList.remove("is-error", "is-success");
+  }, duration);
+};
+
 const renderSongs = (items) => {
   if (!songList) {
     return;
@@ -773,11 +801,14 @@ const renderSongs = (items) => {
           body: JSON.stringify({ id: item.id }),
         });
         if (!response.ok) {
-          throw new Error("No se pudo votar");
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.error || "No se pudo votar");
         }
         await loadSongs();
+        showSongHint("Voto registrado");
       } catch (error) {
         console.error(error);
+        showSongHint(error.message || "No se pudo votar", true);
       } finally {
         voteButton.disabled = false;
       }
@@ -799,12 +830,20 @@ const renderSongs = (items) => {
 };
 
 const loadSongs = async () => {
+  const requestId = ++songsRequestCounter;
   try {
-    const response = await fetch("/api/songs");
+    const response = await fetch(`/api/songs?ts=${Date.now()}`, {
+      cache: "no-store",
+      headers: { "Cache-Control": "no-cache" },
+    });
     if (!response.ok) {
       throw new Error("No se pudo cargar las canciones");
     }
     const data = await response.json();
+    if (requestId < songsLastApplied) {
+      return;
+    }
+    songsLastApplied = requestId;
     const items = data.items || [];
     songsCache = items.map((item) => ({
       ...item,
@@ -816,6 +855,7 @@ const loadSongs = async () => {
     }
   } catch (error) {
     console.error(error);
+    showSongHint("No se pudo actualizar la lista", true, 3000);
   }
 };
 
@@ -844,12 +884,15 @@ if (songForm && songInput) {
         body: JSON.stringify({ title }),
       });
       if (!response.ok) {
-        throw new Error("No se pudo enviar la canción");
+        const data = await response.json().catch(() => ({}));
+        throw new Error(data.error || "No se pudo enviar la canción");
       }
       songInput.value = "";
       await loadSongs();
+      showSongHint("Canción añadida");
     } catch (error) {
       console.error(error);
+      showSongHint(error.message || "No se pudo enviar la canción", true);
     } finally {
       songInput.disabled = false;
     }

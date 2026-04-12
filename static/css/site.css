@@ -1485,6 +1485,16 @@ main {
   font-size: 0.9rem;
   color: rgba(255, 255, 255, 0.65);
   font-style: normal;
+  min-height: 1.4em;
+  transition: color 0.2s ease;
+}
+
+.dj-hint.is-success {
+  color: rgba(205, 231, 187, 0.95);
+}
+
+.dj-hint.is-error {
+  color: rgba(255, 196, 196, 0.98);
 }
 
 .dj-check-note {
@@ -3105,6 +3115,31 @@ main {
   .contact-phone {
     text-align: left;
   }
+
+  .dj-item {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .dj-info {
+    min-width: 0;
+  }
+
+  .dj-title {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    overflow-wrap: anywhere;
+    line-height: 1.3;
+  }
+
+  .dj-vote {
+    margin-left: 0;
+    max-width: 100%;
+    white-space: nowrap;
+  }
 }
 
 @media (max-width: 600px) {
@@ -3300,6 +3335,7 @@ main {
   }
 
   .dj-item {
+    grid-template-columns: 1fr;
     padding: 10px;
     align-items: flex-start;
   }
@@ -3326,6 +3362,8 @@ main {
 
   .dj-vote {
     margin-left: 0;
+    width: 100%;
+    justify-content: center;
     max-width: 100%;
     padding: 8px 10px;
     letter-spacing: 0.11em;
