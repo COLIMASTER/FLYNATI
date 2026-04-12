@@ -617,18 +617,21 @@ def create_song():
     ip = client_ip()
 
     with db_connection() as conn:
-        existing_vote = conn.execute(
-            "SELECT 1 FROM song_votes WHERE ip = ?",
-            (ip,),
-        ).fetchone()
-        if existing_vote:
-            return jsonify({"ok": False, "error": "Ya has votado"}), 400
-
         existing_rows = conn.execute(
             "SELECT id, title, votes, created_at FROM songs"
         ).fetchall()
         for existing in existing_rows:
             if normalize_text(existing["title"]) == normalized_title:
+                vote_ip_key = f"{ip}:{existing['id']}"
+                existing_vote = conn.execute(
+                    """
+                    SELECT 1 FROM song_votes
+                    WHERE song_id = ? AND (ip = ? OR ip = ?)
+                    """,
+                    (existing["id"], vote_ip_key, ip),
+                ).fetchone()
+                if existing_vote:
+                    return jsonify({"ok": False, "error": "Ya has votado esta canción"}), 400
                 conn.execute(
                     "UPDATE songs SET votes = votes + 1 WHERE id = ?",
                     (existing["id"],),
@@ -639,10 +642,10 @@ def create_song():
                         INSERT INTO song_votes (song_id, ip, created_at)
                         VALUES (?, ?, ?)
                         """,
-                        (existing["id"], ip, created_at),
+                        (existing["id"], vote_ip_key, created_at),
                     )
                 except DBIntegrityError:
-                    return jsonify({"ok": False, "error": "Ya has votado"}), 400
+                    return jsonify({"ok": False, "error": "Ya has votado esta canción"}), 400
                 conn.commit()
                 return jsonify({"ok": True})
 
@@ -671,16 +674,17 @@ def create_song():
         if not song_id:
             return jsonify({"ok": False, "error": "No se pudo guardar la canción"}), 500
 
+        vote_ip_key = f"{ip}:{song_id}"
         try:
             conn.execute(
                 """
                 INSERT INTO song_votes (song_id, ip, created_at)
                 VALUES (?, ?, ?)
                 """,
-                (song_id, ip, created_at),
+                (song_id, vote_ip_key, created_at),
             )
         except DBIntegrityError:
-            return jsonify({"ok": False, "error": "Ya has votado"}), 400
+            return jsonify({"ok": False, "error": "Ya has votado esta canción"}), 400
         conn.commit()
 
     return jsonify({"ok": True})
@@ -694,14 +698,18 @@ def vote_song():
     except (TypeError, ValueError):
         return jsonify({"ok": False, "error": "ID inv?lido"}), 400
     ip = client_ip()
+    vote_ip_key = f"{ip}:{song_id}"
 
     with db_connection() as conn:
         existing_vote = conn.execute(
-            "SELECT 1 FROM song_votes WHERE ip = ?",
-            (ip,),
+            """
+            SELECT 1 FROM song_votes
+            WHERE song_id = ? AND (ip = ? OR ip = ?)
+            """,
+            (song_id, vote_ip_key, ip),
         ).fetchone()
         if existing_vote:
-            return jsonify({"ok": False, "error": "Ya has votado"}), 400
+            return jsonify({"ok": False, "error": "Ya has votado esta canción"}), 400
         row = conn.execute(
             "SELECT id FROM songs WHERE id = ?",
             (song_id,),
@@ -720,12 +728,12 @@ def vote_song():
                 """,
                 (
                     song_id,
-                    ip,
+                    vote_ip_key,
                     datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC"),
                 ),
             )
         except DBIntegrityError:
-            return jsonify({"ok": False, "error": "Ya has votado"}), 400
+            return jsonify({"ok": False, "error": "Ya has votado esta canción"}), 400
         conn.commit()
 
     return jsonify({"ok": True})
