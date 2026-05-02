@@ -1,0 +1,547 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Alfonso y Natalia | Boda</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Great+Vibes&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/site.css') }}" />
+  </head>
+  <body class="no-scroll">
+    <div class="intro" id="intro">
+      <div class="intro-backdrop"></div>
+      <div class="intro-glow"></div>
+      <div class="envelope">
+        <div class="envelope-back"></div>
+        <div class="envelope-liner"></div>
+        <div class="paper">
+          <div class="paper-inner">
+            <h1 class="paper-title">¡Nos casamos!</h1>
+          </div>
+        </div>
+        <div class="side-flap left"></div>
+        <div class="side-flap right"></div>
+        <div class="bottom-flap"></div>
+        <div class="address">
+          <span class="address-line">Sevilla 2026</span>
+        </div>
+        <div class="flap"></div>
+        <button class="seal" type="button" aria-label="Abrir invitación">
+          <span>N+A</span>
+        </button>
+      </div>
+      <div class="intro-hint">Pulsa el sello de cera</div>
+    </div>
+
+    <audio
+      id="intro-audio"
+      src="{{ url_for('static', filename='mp3/Sebastian Maschat & Erlend Øye - Price - Barzán Bazaar.mp3') }}"
+      preload="auto"
+    ></audio>
+
+    <nav class="site-nav" aria-label="Navegación principal">
+      <a href="#ubicacion">Detalles y ubicación</a>
+      <a href="#dj">Canciones</a>
+      {% if photos_enabled %}
+      <a href="#galeria">Recuerdos</a>
+      {% endif %}
+    </nav>
+
+    <main class="site" id="top">
+      <section class="section hero" style="--layer: 1">
+        <div class="hero-bg" aria-hidden="true"></div>
+        <div class="hero-overlay" aria-hidden="true"></div>
+        <div class="hero-content">
+          <h1 class="hero-title reveal">Un sí para toda la vida</h1>
+          <p class="hero-date reveal">Sábado 02 mayo 2026</p>
+          <div class="hero-actions reveal">
+            <a class="btn btn-primary" href="#rsvp">Confirmar asistencia</a>
+            <a class="btn btn-ghost" href="#fecha">Ver invitación</a>
+          </div>
+          <div class="scroll-indicator" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <path d="M12 4v14"></path>
+              <path d="M7 13l5 5 5-5"></path>
+            </svg>
+          </div>
+        </div>
+      </section>
+
+      <section class="section countdown" id="fecha" style="--layer: 2">
+        <div class="section-inner countdown-inner">
+          <p class="countdown-date reveal">Sábado 02 mayo 2026 - 13:00 h</p>
+          <div class="countdown-display reveal" data-countdown-target="2026-05-02T13:00:00+02:00">
+            <div class="countdown-block">
+              <span class="countdown-number" id="countdown-days">000</span>
+              <span class="countdown-label">Días</span>
+            </div>
+            <div class="countdown-block">
+              <span class="countdown-number" id="countdown-hours">00</span>
+              <span class="countdown-label">Horas</span>
+            </div>
+            <div class="countdown-block">
+              <span class="countdown-number" id="countdown-minutes">00</span>
+              <span class="countdown-label">Minutos</span>
+            </div>
+            <div class="countdown-block">
+              <span class="countdown-number" id="countdown-seconds">00</span>
+              <span class="countdown-label">Segundos</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section venue" id="ubicacion" style="--layer: 3">
+        <div class="venue-bg" aria-hidden="true"></div>
+        <div class="venue-overlay" aria-hidden="true"></div>
+        <div class="section-inner split">
+          <div class="split-media reveal">
+            <div class="map-frame">
+              <iframe
+                title="Mapa de Hacienda Los Miradores"
+                src="https://maps.google.com/maps?q=Hacienda%20Los%20Miradores%2C%20Mairena%20del%20Alcor%2C%20Sevilla&t=&z=13&ie=UTF8&iwloc=&output=embed"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade"
+              ></iframe>
+              <a
+                class="map-link"
+                href="https://maps.app.goo.gl/jSKAjPSVcYfSwMMJ8"
+                target="_blank"
+                rel="noopener"
+              >
+                Ver en Google Maps
+              </a>
+            </div>
+          </div>
+          <div class="split-text reveal">
+            <p class="eyebrow">Detalles y ubicación</p>
+            <h2>Hacienda Los Miradores</h2>
+            <p>Hacienda Los Miradores, Mairena del Alcor, Sevilla.</p>
+            <p>Queremos que bebáis, riais y bailéis sin preocupaciones.</p>
+            <p class="venue-highlight">Así que esta vez dejad a los peques en casa.</p>
+            <div class="venue-card">
+              <div>
+                <p class="label">Dirección</p>
+                <p>Hacienda Los Miradores, Mairena del Alcor, Sevilla</p>
+              </div>
+              <div>
+                <p class="label">Contacto</p>
+                <div class="contact-list">
+                  <div class="contact-item">
+                    <span class="contact-name">Alfonso</span>
+                    <span class="contact-phone">654110041</span>
+                  </div>
+                  <div class="contact-item">
+                    <span class="contact-name">Natalia</span>
+                    <span class="contact-phone">671286983</span>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <p class="label">Horario</p>
+                <p>13,00 h</p>
+              </div>
+              <div class="dresscode-block">
+                <p class="label">Dress code</p>
+                <div class="dresscode-grid">
+                  <div class="dresscode-item">
+                    <span class="dresscode-role">Hombre</span>
+                    <span class="dresscode-value">Traje de chaqueta</span>
+                  </div>
+                  <div class="dresscode-item">
+                    <span class="dresscode-role">Mujer</span>
+                    <span class="dresscode-value">Vestido tipo cóctel</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section gallery" id="galeria" style="--layer: 6" {% if not photos_enabled %}hidden{% endif %}>
+        <div class="section-inner">
+          <div class="section-head reveal">
+            <p class="eyebrow">Fotos</p>
+            <h2>Comparte tus recuerdos</h2>
+            <p>
+              Sube tus fotos y vídeos de la boda al álbum compartido.
+            </p>
+          </div>
+          <div class="upload-card reveal">
+            <p>Queremos revivir cada detalle contigo.</p>
+            <div class="upload-disabled" data-disabled="false" title="Disponible a partir del 2 de mayo">
+              <a
+                class="btn btn-primary upload-btn"
+                href="https://drive.google.com/drive/folders/1BM1EWF5J0cKfAWuLr_5uAQKVsmpU2ZP-?usp=drive_link"
+                target="_blank"
+                rel="noopener"
+                data-disabled="false"
+                data-available="2026-05-02"
+                aria-disabled="false"
+              >
+                Subir fotos de la boda
+              </a>
+            </div>
+            <p class="upload-note">Disponible a partir del 2 de mayo.</p>
+          </div>
+          <div class="gallery-scroll reveal" aria-label="Galería de recuerdos">
+            <div class="gallery-track" id="gallery-track">
+              <button
+                class="gallery-thumb"
+                type="button"
+                data-full="{{ url_for('static', filename='imagenes/galeria1.jpeg') }}"
+                aria-label="Ampliar foto 1"
+              >
+                <img
+                  src="{{ url_for('static', filename='imagenes/galeria1.jpeg') }}"
+                  alt="Recuerdo 1"
+                  loading="lazy"
+                />
+              </button>
+              <button
+                class="gallery-thumb"
+                type="button"
+                data-full="{{ url_for('static', filename='imagenes/galeria2.jpeg') }}"
+                aria-label="Ampliar foto 2"
+              >
+                <img
+                  src="{{ url_for('static', filename='imagenes/galeria2.jpeg') }}"
+                  alt="Recuerdo 2"
+                  loading="lazy"
+                />
+              </button>
+              <button
+                class="gallery-thumb"
+                type="button"
+                data-full="{{ url_for('static', filename='imagenes/galeria3.jpeg') }}"
+                aria-label="Ampliar foto 3"
+              >
+                <img
+                  src="{{ url_for('static', filename='imagenes/galeria3.jpeg') }}"
+                  alt="Recuerdo 3"
+                  loading="lazy"
+                />
+              </button>
+              <button
+                class="gallery-thumb"
+                type="button"
+                data-full="{{ url_for('static', filename='imagenes/galeria4.jpeg') }}"
+                aria-label="Ampliar foto 4"
+              >
+                <img
+                  src="{{ url_for('static', filename='imagenes/galeria4.jpeg') }}"
+                  alt="Recuerdo 4"
+                  loading="lazy"
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="gallery-band"></div>
+      </section>
+
+      <section class="section dj" id="dj" style="--layer: 7">
+        <div class="section-inner">
+          <div class="section-head reveal">
+            <p class="eyebrow">DJ</p>
+            <h2>La banda sonora de la fiesta</h2>
+            <p>
+              Propón tu canción favorita o vota las que ya están propuestas.
+              El ranking se actualiza en directo.
+            </p>
+          </div>
+          <div class="dj-shell reveal">
+            <form class="dj-form" id="song-form">
+              <label for="song-title">Proponer una canción</label>
+              <div class="dj-form-row">
+                <input
+                  id="song-title"
+                  name="song-title"
+                  type="text"
+                  placeholder="Artista - Canción"
+                  required
+                />
+                <button class="btn btn-primary" type="submit">Proponer</button>
+              </div>
+              <p class="dj-check-note">Revisa que tu canción no esté ya propuesta.</p>
+              <div
+                class="dj-suggestions"
+                id="song-suggestions"
+                role="listbox"
+                aria-label="Coincidencias de canciones"
+                hidden
+              ></div>
+              <p class="dj-hint">Puedes votar las canciones que más te gusten.</p>
+            </form>
+            <div class="dj-board">
+              <div class="dj-tabs" role="tablist" aria-label="Ranking de canciones">
+                <button class="dj-tab is-active" type="button" data-song-view="top">Top 10</button>
+                <button class="dj-tab" type="button" data-song-view="all">Todas</button>
+              </div>
+              <ol class="dj-list" id="song-list"></ol>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section rsvp" id="rsvp" style="--layer: 8">
+        <div class="section-inner">
+          <div class="section-head reveal">
+            <p class="eyebrow">RSVP</p>
+            <h2>Confirma tu asistencia</h2>
+            <p>
+              Tu respuesta nos ayuda a crear una experiencia perfecta. Completa
+              el formulario y cuéntanos tus detalles.
+            </p>
+          </div>
+          <form class="rsvp-form reveal" id="rsvp-form">
+            <div class="field" id="party-type-field">
+              <label>¿Cómo venís?</label>
+              <div class="choice-group" role="radiogroup" aria-label="Tipo de asistencia">
+                <label class="choice">
+                  <input type="radio" name="party-type" value="solo" checked />
+                  <span>Voy solo/a</span>
+                </label>
+                <label class="choice">
+                  <input type="radio" name="party-type" value="pareja" />
+                  <span>Voy con pareja</span>
+                </label>
+                <label class="choice">
+                  <input type="radio" name="party-type" value="familia" />
+                  <span>Voy en familia</span>
+                </label>
+              </div>
+            </div>
+            <div class="field" id="partner-field" hidden>
+              <label for="partner-name">Nombre de tu pareja</label>
+              <input
+                id="partner-name"
+                name="partner-name"
+                type="text"
+                placeholder="Nombre y apellidos"
+              />
+            </div>
+            <div class="field" id="family-field" hidden>
+              <label>Miembros de la familia</label>
+              <div class="family-list" id="family-list">
+                <div class="family-row">
+                  <input
+                    class="family-member"
+                    type="text"
+                    name="family-members"
+                    placeholder="Nombre y apellidos"
+                  />
+                  <button class="family-remove" type="button">Quitar</button>
+                </div>
+              </div>
+              <button class="btn btn-ghost add-family" id="add-family" type="button">Añadir miembro</button>
+            </div>
+            <div class="field">
+              <label for="guest-name">Nombre</label>
+              <input id="guest-name" name="name" type="text" placeholder="Nombre y apellidos" required />
+            </div>
+            <div class="field switches">
+              <div class="switch-row">
+                <div>
+                  <p class="switch-label">Asistirás a la boda</p>
+                  <p class="switch-hint">Marca si vendrás a celebrar con nosotros</p>
+                </div>
+                <label class="switch">
+                  <input id="attending" type="checkbox" checked />
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+            <p class="attending-note" id="attending-note" hidden>Muchas gracias por tu respuesta.</p>
+            <div class="attending-fields" id="attending-fields">
+              <div class="field switches">
+                <div class="switch-row">
+                  <div>
+                    <p class="switch-label">Usarías el autobús</p>
+                    <p class="switch-hint switch-hint--bus">
+                      La vuelta saldrá de la Hacienda a las 23:30 y hará las mismas paradas que la ida.
+                    </p>
+                  </div>
+                  <label class="switch">
+                    <input id="bus" type="checkbox" />
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="field" id="bus-stop-field" hidden>
+                <label>Elige tu parada de ida</label>
+                <div class="choice-group" role="radiogroup" aria-label="Parada de autobús">
+                  <label class="choice">
+                    <input type="radio" name="bus-stop" value="Coria del Rio (recogida a las 11:30)" />
+                    <span>Coria del Rio <span class="choice-meta">(recogida a las 11:30)</span></span>
+                  </label>
+                  <label class="choice">
+                    <input type="radio" name="bus-stop" value="Metro Blas Infante (recogida a las 11:45)" />
+                    <span>Metro Blas Infante <span class="choice-meta">(recogida a las 11:45)</span></span>
+                  </label>
+                  <label class="choice">
+                    <input type="radio" name="bus-stop" value="Hotel Al Andalus (recogida a las 12:00)" />
+                    <span>Hotel Al Andalus <span class="choice-meta">(recogida a las 12:00)</span></span>
+                  </label>
+                  <label class="choice">
+                    <input type="radio" name="bus-stop" value="Santa Justa (recogida a las 12:00)" />
+                    <span>Santa Justa <span class="choice-meta">(recogida a las 12:00)</span></span>
+                  </label>
+                </div>
+              </div>
+              <div class="field switches">
+                <div class="switch-row">
+                  <div>
+                    <p class="switch-label">Tengo alergias o intolerancias</p>
+                    <p class="switch-hint">Actívalo si necesitas menú especial</p>
+                  </div>
+                  <label class="switch">
+                    <input id="allergies-toggle" type="checkbox" />
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+              <div class="field" id="allergies-field" hidden>
+                <label for="allergies">Indica cuáles</label>
+                <input id="allergies" name="allergies" type="text" placeholder="Cuéntanoslo aquí" />
+              </div>
+              <div class="field">
+                <label for="message">Consejo, mensaje o deseo para los novios</label>
+                <textarea id="message" name="message" rows="4" placeholder="Prometemos leerlos todos &hearts;"></textarea>
+              </div>
+            </div>
+            <button class="btn btn-primary" type="submit">Enviar respuesta</button>
+            <p class="form-note" id="form-note"></p>
+          </form>
+        </div>
+        <div class="rsvp-glow"></div>
+      </section>
+
+      <section class="section gift" id="cuenta-regalo" style="--layer: 8.5" aria-label="Cuenta regalo">
+        <div class="gift-bg" aria-hidden="true"></div>
+        <div class="gift-overlay" aria-hidden="true"></div>
+        <div class="section-inner">
+          <article class="gift-card reveal">
+            <h2 class="gift-phrase">
+              <span class="gift-phrase-part">Dicen que el dinero no compra la felicidad…</span>
+              <span class="gift-phrase-part">¡pero ayuda a pagar la luna de miel!</span>
+            </h2>
+            <p class="gift-thanks">Gracias</p>
+            <p class="gift-names">
+              Natalia Rodríguez Delgado<br />
+              Alfonso López-Sáez
+            </p>
+            <div class="gift-iban-wrap">
+              <p class="gift-iban-label">IBAN</p>
+              <p class="gift-iban">ES82 2080 0667 4830 4108 8657</p>
+            </div>
+            <div class="gift-actions">
+              <button
+                class="btn btn-primary gift-copy-btn"
+                id="copy-iban-btn"
+                type="button"
+                data-iban="ES82 2080 0667 4830 4108 8657"
+              >
+                Copiar IBAN
+              </button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section
+        class="section mischief"
+        id="mala-idea"
+        style="--layer: 9"
+        aria-label="Mala idea"
+        {% if not mischief_enabled %}hidden{% endif %}
+      >
+        <div class="section-inner">
+          <div class="mala-card reveal">
+            <p class="mala-label">Mala idea</p>
+            <button class="mala-button" id="mala-button" type="button" aria-label="Botón del reto">
+              <svg class="mala-svg" viewBox="0 0 200 200" aria-hidden="true">
+                <defs>
+                  <radialGradient id="malaGlow" cx="50%" cy="35%" r="60%">
+                    <stop offset="0%" stop-color="#ffd1d1" />
+                    <stop offset="55%" stop-color="#ff4d4d" />
+                    <stop offset="100%" stop-color="#9f0f0f" />
+                  </radialGradient>
+                </defs>
+                <circle cx="100" cy="100" r="78" fill="url(#malaGlow)" />
+                <circle
+                  cx="100"
+                  cy="100"
+                  r="86"
+                  fill="none"
+                  stroke="rgba(255, 255, 255, 0.35)"
+                  stroke-width="3"
+                />
+              </svg>
+            </button>
+            <p class="mala-hint" id="mala-hint">Ten cuidado con lo que pulsas...</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="section closing" style="--layer: 10">
+        <div class="section-inner reveal">
+          <p class="eyebrow">Gracias</p>
+          <h2>Nos encantará compartir este día contigo</h2>
+          <a class="btn btn-ghost" href="#top">Volver arriba</a>
+        </div>
+      </section>
+    </main>
+
+    <div class="thankyou-overlay" id="thankyou-overlay" aria-hidden="true">
+      <div class="thankyou-door door-left" aria-hidden="true"></div>
+      <div class="thankyou-door door-right" aria-hidden="true"></div>
+      <div class="thankyou-content">
+        <p class="thankyou-title">Gracias por tu respuesta</p>
+        <p class="thankyou-subtitle">Te esperamos con ilusión</p>
+      </div>
+    </div>
+
+    <div class="gallery-lightbox" id="gallery-lightbox" aria-hidden="true">
+      <button
+        class="gallery-lightbox-close"
+        id="gallery-lightbox-close"
+        type="button"
+        aria-label="Cerrar foto"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 6l12 12"></path>
+          <path d="M18 6l-12 12"></path>
+        </svg>
+      </button>
+      <img id="gallery-lightbox-image" alt="" />
+    </div>
+
+    <button
+      class="sound-toggle"
+      id="sound-toggle"
+      type="button"
+      aria-pressed="true"
+      aria-label="Sonido activado"
+      title="Sonido activado"
+    >
+      <svg class="sound-icon sound-on" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 9h4l5-4v14l-5-4H4z"></path>
+        <path d="M16 8a4 4 0 0 1 0 8"></path>
+        <path d="M18.5 5.5a7 7 0 0 1 0 13"></path>
+      </svg>
+      <svg class="sound-icon sound-off" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 9h4l5-4v14l-5-4H4z"></path>
+        <path d="M19 5L5 19"></path>
+      </svg>
+    </button>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  </body>
+</html>
